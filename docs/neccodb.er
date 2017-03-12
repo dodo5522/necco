@@ -1,0 +1,78 @@
+title {label: "地域通貨ねっこWeb通帳データベース設計ER図", size: "20"}
+header {label: "not null"}
+relationship {label: ""}
+
+# Nice colors from Erwiz:
+# red #fcecec
+# blue #ececfc
+# green #d0e0d0
+# yellow #fbfbdb
+# orange #eee0a0
+
+# Entities
+
+# 誰が、いつ、誰に対して、何を、いくらで提供したか、を示すテーブル
+[history] {bgcolor: "#fcecec"}
+  *id {label: "bigint"}
+  created_at {label: "datetime"}
+  updated_at {label: "datetime"}
+  +payer_id {label: "bigint"}
+  provided_at {label: "bigint"}
+  +peyee_id {label: "bigint"}
+  what {label: "varchar(1024)"}
+  price_necco {label: "int"}
+  price_yen {label: "int"}
+
+[account] {bgcolor: "#ececfc"}
+  *id {label: "bigint"}
+  created_at {label: "datetime"}
+  updated_at {label: "datetime"}
+  name {label: "varchar(128)"}
+  kana {label: "varchar(128)"}
+  nickname {label: "varchar(128)"}
+  password {label: "varchar(128)"}
+  email {label: "varchar(321)"}
+  phone {label: "varchar(32)"}
+  fax {label: "varchar(32)"}
+  +location_id {label: "bigint"}
+
+[ability] {bgcolor: "#d0e0d0"}
+  *id {label: "bigint"}
+  created_at {label: "datetime"}
+  updated_at {label: "datetime"}
+  +user_id {label: "bigint"}
+  genre {label: "varchar(1024)"}
+  detail {label: "varchar(1024)"}
+
+[request] {bgcolor: "#d0e0d0"}
+  *id {label: "bigint"}
+  created_at {label: "datetime"}
+  updated_at {label: "datetime"}
+  +user_id {label: "bigint"}
+  genre {label: "varchar(1024)"}
+  detail {label: "varchar(1024)"}
+
+[location] {bgcolor: "#d0e0d0"}
+  *id {label: "bigint"}
+  created_at {label: "datetime"}
+  updated_at {label: "datetime"}
+  +prefecture_id {label: "int"}
+  city {label: "varchar(16)"}
+  street {label: "varchar(128)"}
+  latitude {label: "double(7,5)"} # -89.99999
+  longitude {label: "double(8,5)"} # -179.99999
+
+[prefecture] {bgcolor: "#fbfbdb"}
+  *id {label: "int"}
+  created_at {label: "datetime"}
+  updated_at {label: "datetime"}
+  name_ {label: "varchar(16), unique"}
+
+# Relationships
+
+history    *--1 account {label: "payer"}
+history    *--1 account {label: "payee"}
+account    *--1 location {label: "location"}
+account    1--+ ability
+account    1--+ request
+location   *--1 prefecture
