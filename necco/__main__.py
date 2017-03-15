@@ -17,10 +17,19 @@
 
 from flask import Flask, render_template, request, redirect, url_for
 import json
+import os
 import sqlalchemy
+
 
 _TITLE = "地域通貨ねっこWeb通帳"
 _APP = Flask(_TITLE)
+_TMP_HOST_FILE = "/var/tmp/host"
+
+if os.path.isfile(_TMP_HOST_FILE):
+    with open(_TMP_HOST_FILE, "r") as f:
+        _HOST = f.readline()
+else:
+    _HOST = "localhost"
 
 
 @_APP.route("/")
@@ -53,6 +62,10 @@ def index():
         records=records)
 
 
+def main(host=_HOST, port=8888, debug=False):
+    _APP.debug = debug
+    _APP.run(host=host, port=port)
+
+
 if __name__ == "__main__":
-    _APP.debug = True
-    _APP.run(host="localhost")
+    main(host="localhost", port=5000, debug=True)
