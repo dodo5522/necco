@@ -23,13 +23,6 @@ import sqlalchemy
 
 _TITLE = "地域通貨ねっこWeb通帳"
 _APP = Flask(_TITLE)
-_TMP_HOST_FILE = "/var/tmp/host"
-
-if os.path.isfile(_TMP_HOST_FILE):
-    with open(_TMP_HOST_FILE, "r") as f:
-        _HOST = f.readline()
-else:
-    _HOST = "localhost"
 
 
 @_APP.route("/")
@@ -62,10 +55,10 @@ def index():
         records=records)
 
 
-def main(host=_HOST, port=8888, debug=False):
+def main(host="0.0.0.0", port=5000, debug=False):
     _APP.debug = debug
     _APP.run(host=host, port=port)
 
 
 if __name__ == "__main__":
-    main(host="localhost", port=5000, debug=True)
+    main()
