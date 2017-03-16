@@ -6,15 +6,23 @@ $(function() {
     targetItem.addClass("active");
   };
 
-  $("#navbar-item-main").on("click", function() {
-    activateNavbarItem("#navbar-item-main");
+  var showContent = function(idContent) {
+    $(".necco-content").css("display", "none");
+    $(idContent).css("display", "");
+  };
+
+  $("#navbar-item-passbook").on("click", function() {
+    activateNavbarItem("#navbar-item-passbook");
+    showContent("#id-necco-content-passbook");
   });
   $("#navbar-item-settings").on("click", function() {
     activateNavbarItem("#navbar-item-settings");
+    showContent("#id-necco-content-settings");
   });
-  $("#navbar-item-userlist").on("click", function() {
-    activateNavbarItem("#navbar-item-userlist");
+  $("#navbar-item-deshilist").on("click", function() {
+    activateNavbarItem("#navbar-item-deshilist");
+    showContent("#id-necco-content-deshilist");
   });
 
-  $("#navbar-item-main").addClass("active");
+  $("#navbar-item-passbook").addClass("active");
 });
