@@ -15,19 +15,25 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from flask import Flask, render_template, request, redirect, url_for
-import json
-import os
-import sqlalchemy
+from flask import Flask, render_template, render_template_string, session, request, redirect, url_for
 
 
 _TITLE = "地域通貨ねっこWeb通帳"
 _APP = Flask(_TITLE)
+_APP.secret_key = "376dd5514e943f12d2105b3dfe272b92"
+
+
+@_APP.before_request
+def prefix():
+    if "username" in session:
+        return
+    if request.path == "/login":
+        return
+    return redirect("/login")
 
 
 @_APP.route("/")
 def index():
-
     # FIXME: Dummy data. Remove it if data can be got from SQL DB.
     records = [
         {
@@ -51,8 +57,25 @@ def index():
     return render_template(
         "index.html",
         title=_TITLE,
-        subtitle="temp@temp.com",
+        username=session["username"],
         records=records)
+
+
+@_APP.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template(
+            "login.html",
+            title=_TITLE)
+
+    session["username"] = request.form["email"]
+    return redirect("/")
+
+
+@_APP.route("/logout", methods=["GET"])
+def logout():
+    session.pop("username", None)
+    return redirect("/login")
 
 
 def main(host="0.0.0.0", port=5000, debug=False):
