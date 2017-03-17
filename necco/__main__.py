@@ -15,72 +15,12 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from flask import Flask, render_template, render_template_string, session, request, redirect, url_for
-
-
-_TITLE = "地域通貨ねっこWeb通帳"
-_APP = Flask(_TITLE)
-_APP.secret_key = "376dd5514e943f12d2105b3dfe272b92"
-
-
-@_APP.before_request
-def prefix():
-    if "username" in session:
-        return
-    if request.path == "/login":
-        return
-    return redirect("/login")
-
-
-@_APP.route("/")
-def index():
-    # FIXME: Dummy data. Remove it if data can be got from SQL DB.
-    records = [
-        {
-            "dealed_at": "2017-03-10",
-            "from_whom": "りん",
-            "to_whom": "",
-            "what": "イースト菌の育て方",
-            "price_necco": -1,
-            "price_yen": -100,
-        },
-        {
-            "dealed_at": "2017-03-13",
-            "from_whom": "",
-            "to_whom": "さき",
-            "what": "電子回路修理",
-            "price_necco": 1,
-            "price_yen": 0,
-        },
-    ]
-
-    return render_template(
-        "index.html",
-        title=_TITLE,
-        username=session["username"],
-        records=records)
-
-
-@_APP.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "GET":
-        return render_template(
-            "login.html",
-            title=_TITLE)
-
-    session["username"] = request.form["email"]
-    return redirect("/")
-
-
-@_APP.route("/logout", methods=["GET"])
-def logout():
-    session.pop("username", None)
-    return redirect("/login")
+from necco.route import app
 
 
 def main(host="0.0.0.0", port=5000, debug=False):
-    _APP.debug = debug
-    _APP.run(host=host, port=port)
+    app.debug = debug
+    app.run(host=host, port=port)
 
 
 if __name__ == "__main__":
