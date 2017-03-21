@@ -11,68 +11,83 @@ relationship {label: ""}
 
 # Entities
 
-# 誰が、いつ、誰に対して、何を、いくらで提供したか、を示すテーブル
-[history] {bgcolor: "#fcecec"}
+[User] {bgcolor: "#ececfc"}
   *id {label: "bigint"}
   created_at {label: "datetime"}
   updated_at {label: "datetime"}
-  +payer_id {label: "bigint"}
+  email {label: "varchar(321)"}
+  password {label: "varchar(128)"}
+
+# 誰が、いつ、誰に対して、何を、いくらで提供したか、を示すテーブル
+[History] {bgcolor: "#fcecec"}
+  *id {label: "bigint"}
+  created_at {label: "datetime"}
+  updated_at {label: "datetime"}
+  +payer_user_id {label: "bigint"}
   provided_at {label: "bigint"}
-  +peyee_id {label: "bigint"}
+  +peyee_user_id {label: "bigint"}
   what {label: "varchar(1024)"}
   price_necco {label: "int"}
   price_yen {label: "int"}
 
-[account] {bgcolor: "#ececfc"}
+[Profile] {bgcolor: "#d0e0d0"}
   *id {label: "bigint"}
   created_at {label: "datetime"}
   updated_at {label: "datetime"}
+  +user_id {label: "bigint"}
   name {label: "varchar(128)"}
   kana {label: "varchar(128)"}
   nickname {label: "varchar(128)"}
-  password {label: "varchar(128)"}
-  email {label: "varchar(321)"}
   phone {label: "varchar(32)"}
   fax {label: "varchar(32)"}
-  +location_id {label: "bigint"}
-
-[ability] {bgcolor: "#d0e0d0"}
-  *id {label: "bigint"}
-  created_at {label: "datetime"}
-  updated_at {label: "datetime"}
-  +user_id {label: "bigint"}
-  genre {label: "varchar(1024)"}
-  detail {label: "varchar(1024)"}
-
-[request] {bgcolor: "#d0e0d0"}
-  *id {label: "bigint"}
-  created_at {label: "datetime"}
-  updated_at {label: "datetime"}
-  +user_id {label: "bigint"}
-  genre {label: "varchar(1024)"}
-  detail {label: "varchar(1024)"}
-
-[location] {bgcolor: "#d0e0d0"}
-  *id {label: "bigint"}
-  created_at {label: "datetime"}
-  updated_at {label: "datetime"}
+  profile {label: "varchar(4096)"}
   +prefecture_id {label: "int"}
   city {label: "varchar(16)"}
   street {label: "varchar(128)"}
   latitude {label: "double(7,5)"} # -89.99999
   longitude {label: "double(8,5)"} # -179.99999
 
-[prefecture] {bgcolor: "#fbfbdb"}
+[Prefecture] {bgcolor: "#fbfbdb"}
   *id {label: "int"}
   created_at {label: "datetime"}
   updated_at {label: "datetime"}
   name_ {label: "varchar(16), unique"}
 
+[UsersAbility] {bgcolor: "#d0e0d0"}
+  *id {label: "bigint"}
+  created_at {label: "datetime"}
+  updated_at {label: "datetime"}
+  +user_id {label: "bigint"}
+  +ability_id {label: "bigint"}
+
+[Ability] {bgcolor: "#fbfbdb"}
+  *id {label: "bigint"}
+  created_at {label: "datetime"}
+  updated_at {label: "datetime"}
+  genre {label: "varchar(1024)"}
+  detail {label: "varchar(1024)"}
+
+[UsersRequest] {bgcolor: "#d0e0d0"}
+  *id {label: "bigint"}
+  created_at {label: "datetime"}
+  updated_at {label: "datetime"}
+  +user_id {label: "bigint"}
+  +request_id {label: "bigint"}
+
+[Request] {bgcolor: "#fbfbdb"}
+  *id {label: "bigint"}
+  created_at {label: "datetime"}
+  updated_at {label: "datetime"}
+  genre {label: "varchar(1024)"}
+  detail {label: "varchar(1024)"}
+
 # Relationships
 
-history    *--1 account {label: "payer"}
-history    *--1 account {label: "payee"}
-account    *--1 location {label: "location"}
-account    1--+ ability
-account    1--+ request
-location   *--1 prefecture
+History      *--1 User {label: "payer"}
+History      *--1 User {label: "payee"}
+User         1--1 Profile
+Profile      *--1 Prefecture
+User         1--+ UsersAbility
+UsersAbility +--1 Ability
+User         1--+ UsersRequest
+UsersRequest +--1 Request

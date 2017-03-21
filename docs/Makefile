@@ -1,8 +1,15 @@
+.PHONY:all clean show
+
 IN := neccodb.er
 OUT := ./out/$(IN:.er=.png)
 ERD := ./erd/dist/build/erd/erd
 
-all:$(OUT) $(ERD)
+all:show $(ERD)
+
+show:$(OUT)
+	@if [ ! -z "$(shell which open)" ]; then \
+		open $<; \
+	fi
 
 $(OUT):$(IN)
 	@$(ERD) -i $(<) -o $(@)
