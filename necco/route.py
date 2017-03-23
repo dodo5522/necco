@@ -15,6 +15,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from necco.auth import PasswordAuthantication
 from necco import config
 from flask import Flask, render_template, session, request, redirect
 import random
@@ -30,14 +31,20 @@ def prefix():
     """ Function to be called before running app.route().
     """
     if "username" in session:
-        return
-    if request.path == "/login":
-        return
+        return None
+    if "/login" in request.path:
+        return None
+    if "/static" in request.path:
+        return None
+
     return redirect("/login")
 
 
 @app.route("/")
 def index():
+    if not session["username"]:
+        return redirect("/login")
+
     # FIXME: Dummy data. Remove it if data can be got from SQL DB.
     records = [
         {
@@ -71,6 +78,13 @@ def login():
         return render_template(
             "login.html",
             title=config.TITLE)
+
+    auth = PasswordAuthantication(
+        request.form["email"],
+        request.form["password"])
+
+    if not auth.is_authenticated():
+        return redirect("/login")
 
     session["username"] = request.form["email"]
     return redirect("/")
