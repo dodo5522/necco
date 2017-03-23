@@ -15,49 +15,12 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from flask import Flask, render_template, request, redirect, url_for
-import json
-import os
-import sqlalchemy
-
-
-_TITLE = "地域通貨ねっこWeb通帳"
-_APP = Flask(_TITLE)
-
-
-@_APP.route("/")
-def index():
-
-    # FIXME: Dummy data. Remove it if data can be got from SQL DB.
-    records = [
-        {
-            "dealed_at": "2017-03-10",
-            "from_whom": "りん",
-            "to_whom": "",
-            "what": "イースト菌の育て方",
-            "price_necco": -1,
-            "price_yen": -100,
-        },
-        {
-            "dealed_at": "2017-03-13",
-            "from_whom": "",
-            "to_whom": "さき",
-            "what": "電子回路修理",
-            "price_necco": 1,
-            "price_yen": 0,
-        },
-    ]
-
-    return render_template(
-        "index.html",
-        title=_TITLE,
-        subtitle="temp@temp.com",
-        records=records)
+from necco.route import app
 
 
 def main(host="0.0.0.0", port=5000, debug=False):
-    _APP.debug = debug
-    _APP.run(host=host, port=port)
+    app.debug = debug
+    app.run(host=host, port=port)
 
 
 if __name__ == "__main__":
