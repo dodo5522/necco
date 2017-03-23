@@ -15,12 +15,14 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from necco import config
 from flask import Flask, render_template, session, request, redirect
+import random
+import string
 
 
-title = "地域通貨ねっこWeb通帳"
-app = Flask(title)
-app.secret_key = "376dd5514e943f12d2105b3dfe272b92"
+app = Flask(config.TITLE)
+app.secret_key = "".join([random.choice(string.ascii_lowercase + string.digits) for _ in range(128)])
 
 
 @app.before_request
@@ -58,7 +60,7 @@ def index():
 
     return render_template(
         "index.html",
-        title=title,
+        title=config.TITLE,
         username=session["username"],
         records=records)
 
@@ -68,7 +70,7 @@ def login():
     if request.method == "GET":
         return render_template(
             "login.html",
-            title=title)
+            title=config.TITLE)
 
     session["username"] = request.form["email"]
     return redirect("/")
