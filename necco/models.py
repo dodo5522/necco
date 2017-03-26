@@ -47,15 +47,32 @@ class MySqlDriver(object):
         return self.engine.execute(query).fetchall()
 
 
-# """SELECT User.id, Profile.name_, Request.detail FROM User
-#     INNER JOIN Profile ON User.id = Profile.user_id
-#     INNER JOIN UsersRequest ON User.id = UsersRequest.user_id
-#     INNER JOIN Request ON UsersRequest.request_id = Request.id;""")
-
-
 db = MySqlDriver(
     user=config.MYSQL_USER,
     password=config.MYSQL_PASSWORD,
     server=config.MYSQL_SERVER,
     port=config.MYSQL_PORT,
     database=config.MYSQL_DB)
+
+
+class NeccoDbWrapper(object):
+    _QUERY_GET_REQUESTS = """
+        SELECT Profile.name_, Profile.kana, Request.detail FROM User
+            INNER JOIN Profile ON User.id = Profile.user_id
+            INNER JOIN UsersRequest ON User.id = UsersRequest.user_id
+            INNER JOIN Request ON UsersRequest.request_id = Request.id;"""
+
+    _QUERY_GET_ABILITIES = """
+        SELECT Profile.name_, Profile.kana, Ability.detail FROM Profile
+            INNER JOIN User ON Profile.user_id = User.id
+            INNER JOIN UsersAbility ON User.id = UsersAbility.user_id
+            INNER JOIN Ability ON UsersAbility.ability_id = Ability.id;"""
+
+    def __init__(self, db=db):
+        self._db = db
+
+    def get_requests(self):
+        return self._db.execute(self._QUERY_GET_REQUESTS)
+
+    def get_abilities(self):
+        return self._db.execute(self._QUERY_GET_ABILITIES)
