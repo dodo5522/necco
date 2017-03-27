@@ -47,7 +47,7 @@ class MySqlDriver(object):
         return self.engine.execute(query).fetchall()
 
 
-db = MySqlDriver(
+_db = MySqlDriver(
     user=config.MYSQL_USER,
     password=config.MYSQL_PASSWORD,
     server=config.MYSQL_SERVER,
@@ -68,11 +68,19 @@ class NeccoDbWrapper(object):
             INNER JOIN UsersAbility ON User.id = UsersAbility.user_id
             INNER JOIN Ability ON UsersAbility.ability_id = Ability.id;"""
 
-    def __init__(self, db=db):
-        self._db = db
+    def __init__(self, db_=_db):
+        self._db = db_
 
     def get_requests(self):
         return self._db.execute(self._QUERY_GET_REQUESTS)
 
     def get_abilities(self):
         return self._db.execute(self._QUERY_GET_ABILITIES)
+
+    def get_hashed_password(self, id_):
+        record = self._db.execute("SELECT password_ FROM User WHERE email = '{}'".format(id_))
+
+        if not record:
+            return None
+
+        return record[0][0]
