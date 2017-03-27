@@ -30,10 +30,10 @@ class AbstractAuthentication(object):
         return self._is_authenticated
 
 
-class PasswordAuthantication(AbstractAuthentication):
-    def __init(self, id_, password, db=db):
-        super().__init__(id_, password)
-        self._db = db
+class PasswordAuthentication(AbstractAuthentication):
+    def __init__(self, id_, password):
+        self._db = NeccoDbWrapper()
+        super(PasswordAuthentication, self).__init__(id_, password)
 
     def _do_authentication(self, id_, password):
         # FIXME: move this sentence to db.py as some API.

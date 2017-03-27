@@ -15,8 +15,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from necco.auth import PasswordAuthantication
+import json
 from necco import config
+from necco.auth import PasswordAuthentication
+from necco.models import NeccoDbWrapper
 from flask import Flask, render_template, session, request, redirect
 import random
 import string
@@ -79,7 +81,7 @@ def login():
             "login.html",
             title=config.TITLE)
 
-    auth = PasswordAuthantication(
+    auth = PasswordAuthentication(
         request.form["email"],
         request.form["password"])
 
