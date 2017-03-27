@@ -19,8 +19,9 @@
     <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
       <ul class="nav navbar-nav" id="navbar-item-list">
         <li id="navbar-item-passbook"><a href="#">通帳</a></li>
-        <li id="navbar-item-settings"><a href="#">設定</a></li>
-        <li id="navbar-item-deshilist"><a href="#">でしリスト</a></li>
+        <li id="navbar-item-settings"><a href="#">わたしのでしリスト</a></li>
+        <li id="navbar-item-abilities"><a href="#">みんなができること</a></li>
+        <li id="navbar-item-requests"><a href="#">みんながしてほしいこと</a></li>
         <!--
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
@@ -76,43 +77,13 @@
       {% endfor %}
     </tbody>
   </table>
-  {% include "pagenation.html" %}
 </div>
 <div class="necco-content" id="id-necco-content-settings" style="display:none">
-  <table class="table table-responsive table-hover">
-    <thead>
-      <tr>
-        <th>お名前</th>
-        <th>ニックネーム</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for record in records %}
-      <tr>
-        <td>{{ name }}</td>
-        <td>{{ nickname }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
 </div>
-<div class="necco-content" id="id-necco-content-deshilist" style="display:none">
-  <table class="table table-responsive table-hover">
-    <thead>
-      <tr>
-        <th>お名前</th>
-        <th>おところ</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for record in records %}
-      <tr>
-        <td>{{ name }}</td>
-        <td>{{ address }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% include "pagenation.html" %}
+<div class="necco-content" id="id-necco-content-abilities" style="display:none">
 </div>
+<div class="necco-content" id="id-necco-content-requests" style="display:none">
+</div>
+
+{% include "pagenation.html" %}
 {% endblock %}

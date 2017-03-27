@@ -15,7 +15,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from necco.models import db
+from necco.models import NeccoDbWrapper
 from werkzeug.security import check_password_hash
 
 
@@ -30,21 +30,13 @@ class AbstractAuthentication(object):
         return self._is_authenticated
 
 
-class PasswordAuthantication(AbstractAuthentication):
-    def __init(self, id_, password, db=db):
-        super().__init__(id_, password)
-        self._db = db
+class PasswordAuthentication(AbstractAuthentication):
+    def __init__(self, id_, password):
+        self._db = NeccoDbWrapper()
+        super(PasswordAuthentication, self).__init__(id_, password)
 
     def _do_authentication(self, id_, password):
-        # FIXME: move this sentence to db.py as some API.
-        record = db.execute("SELECT email, password_ FROM User WHERE email = '{}'".format(id_))
-
-        if not record:
-            return False
-
-        _, hashed_password = record[0]
-
-        if not check_password_hash(hashed_password, password):
+        if not check_password_hash(self._db.get_hashed_password(id_), password):
             return False
 
         return True

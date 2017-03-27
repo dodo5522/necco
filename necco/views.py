@@ -15,8 +15,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from necco.auth import PasswordAuthantication
+import json
 from necco import config
+from necco.auth import PasswordAuthentication
+from necco.models import NeccoDbWrapper
 from flask import Flask, render_template, session, request, redirect
 import random
 import string
@@ -24,6 +26,7 @@ import string
 
 app = Flask(config.TITLE)
 app.secret_key = "".join([random.choice(string.ascii_lowercase + string.digits) for _ in range(128)])
+model = NeccoDbWrapper()
 
 
 @app.before_request
@@ -79,7 +82,7 @@ def login():
             "login.html",
             title=config.TITLE)
 
-    auth = PasswordAuthantication(
+    auth = PasswordAuthentication(
         request.form["email"],
         request.form["password"])
 
@@ -94,3 +97,19 @@ def login():
 def logout():
     session.pop("username", None)
     return redirect("/login")
+
+
+@app.route("/api/abilities", methods=["GET", ])
+def get_ability_list():
+    columns = ["name", "kana", "detail"]
+    abilities = [{columns[i]: r[i] for i in range(3)} for r in model.get_abilities()]
+
+    return json.dumps(abilities)
+
+
+@app.route("/api/requests", methods=["GET", ])
+def get_request_list():
+    columns = ["name", "kana", "detail"]
+    requests = [{columns[i]: r[i] for i in range(3)} for r in model.get_requests()]
+
+    return json.dumps(requests)
