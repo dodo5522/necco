@@ -94,3 +94,19 @@ def login():
 def logout():
     session.pop("username", None)
     return redirect("/login")
+
+
+@app.route("/api/ability-list", methods=["GET", ])
+def get_ability_list():
+    columns = ["name", "kana", "detail"]
+    abilities = [{columns[i]: r[i] for i in range(3)} for r in model.get_abilities()]
+
+    return json.dumps(abilities)
+
+
+@app.route("/api/request-list", methods=["GET", ])
+def get_request_list():
+    columns = ["name", "kana", "detail"]
+    requests = [{columns[i]: r[i] for i in range(3)} for r in model.get_requests()]
+
+    return json.dumps(requests)
