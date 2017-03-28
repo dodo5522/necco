@@ -26,6 +26,7 @@ import string
 
 app = Flask(config.TITLE)
 app.secret_key = "".join([random.choice(string.ascii_lowercase + string.digits) for _ in range(128)])
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 3600
 model = NeccoDbWrapper()
 
 
