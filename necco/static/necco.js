@@ -21,34 +21,7 @@ $(function() {
     showContent("#id-necco-content-settings");
   });
 
-  var getSortedDeshiRecords = function(type_) {
-    var records;
-    var res = $.ajax({
-      type: "GET",
-      url: "/api/" + type_,
-      dataType: "json"});
-
-    if(res.status === 200) {
-      records = res.responseJSON.sort(
-        function(first, second) {
-          if(first.kana > second.kana) {
-            return 1;
-          }
-          else if(first.kana < second.kana) {
-            return -1;
-          }
-          else {
-            return 0;
-          }
-        })
-    }
-
-    return records;
-  };
-
-  $("#navbar-item-abilities").on("click", function() {
-    var type_ = "abilities";
-
+  var prepareContent = function(type_) {
     activateNavbarItem("#navbar-item-" + type_);
     showContent("#id-necco-content-" + type_);
 
@@ -59,6 +32,22 @@ $(function() {
     table.addClass("table");
     table.addClass("table-responsive");
     table.addClass("table-hover");
+
+    return table;
+  };
+
+  var sortRecordsByKana = function(records) {
+    return records.sort(
+      function(first, second) {
+        if(first.kana > second.kana) { return 1; }
+        else if(first.kana < second.kana) { return -1; }
+        else { return 0; }
+      })
+    };
+
+  $("#navbar-item-abilities").on("click", function() {
+    var type_ = "abilities";
+    var table = prepareContent(type_);
 
     columns = new Array("name", "kana", "detail");
     columns_j = new Array("名前", "よみ", "できること");
@@ -69,31 +58,30 @@ $(function() {
       $("<th>").text(columns_j[i]).appendTo(tr)
     }
 
-    var records = getSortedDeshiRecords(type_);
+    var ret = $.ajax({
+      type: "GET",
+      url: "/api/" + type_,
+      dataType: "json"});
 
-    var body = $("<tbody>").appendTo(table);
-    for(var record of records) {
-      var tr = $("<tr>").appendTo(head);
-      for(var i = 0; i <= columns.length; i++) {
-        $("<td>").text(record[columns[i]]).appendTo(tr);
+    ret.done(function(res) {
+      var records = sortRecordsByKana(res);
+      var body = $("<tbody>").appendTo(table);
+
+      for(var record of records) {
+        var tr = $("<tr>").appendTo(body);
+        for(var i = 0; i <= columns.length; i++) {
+          $("<td>").text(record[columns[i]]).appendTo(tr);
+        }
       }
-    }
+    });
+
+    ret.fail(function(res) {
+    });
   });
 
   $("#navbar-item-requests").on("click", function() {
     var type_ = "requests";
-
-    activateNavbarItem("#navbar-item-" + type_);
-    showContent("#id-necco-content-" + type_);
-
-    var type_ = "requests";
-    var content = $("#id-necco-content-" + type_);
-    content.empty();
-
-    var table = $("<table>").appendTo(content);
-    table.addClass("table");
-    table.addClass("table-responsive");
-    table.addClass("table-hover");
+    var table = prepareContent(type_);
 
     columns = new Array("name", "kana", "detail");
     columns_j = new Array("名前", "よみ", "してほしいこと");
@@ -104,15 +92,25 @@ $(function() {
       $("<th>").text(columns_j[i]).appendTo(tr)
     }
 
-    var records = getSortedDeshiRecords(type_);
+    var ret = $.ajax({
+      type: "GET",
+      url: "/api/" + type_,
+      dataType: "json"});
 
-    var body = $("<tbody>").appendTo(table);
-    for(var record of records) {
-      var tr = $("<tr>").appendTo(head);
-      for(var i = 0; i <= columns.length; i++) {
-        $("<td>").text(record[columns[i]]).appendTo(tr);
+    ret.done(function(res) {
+      var records = sortRecordsByKana(res);
+      var body = $("<tbody>").appendTo(table);
+
+      for(var record of records) {
+        var tr = $("<tr>").appendTo(body);
+        for(var i = 0; i <= columns.length; i++) {
+          $("<td>").text(record[columns[i]]).appendTo(tr);
+        }
       }
-    }
+    });
+
+    ret.fail(function(res) {
+    });
   });
 
   $("#navbar-item-passbook").addClass("active");
