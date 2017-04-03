@@ -16,6 +16,7 @@
 #   limitations under the License.
 
 import json
+from jinja2 import FileSystemLoader
 from necco import config
 from necco.auth import PasswordAuthentication
 from necco.models import NeccoDatabase
@@ -26,6 +27,7 @@ import string
 
 app = Flask(config.TITLE)
 app.secret_key = "".join([random.choice(string.ascii_lowercase + string.digits) for _ in range(128)])
+app.jinja_loader = FileSystemLoader(config.DOCROOT)
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 3600
 model = NeccoDatabase()
 
