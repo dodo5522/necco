@@ -16,71 +16,85 @@
 #   limitations under the License.
 
 from necco import config
-import sqlalchemy
+from sqlalchemy import create_engine, MetaData
 
 
-class MySqlDriver(object):
-    """ Temprary implementation of DB driver API class.
+class NeccoDatabase(object):
+    __instance = None
 
-    Args:
-        user: User name with read priviledged.
-        password: The user's Password to access DB.
-        server: DB host address.
-        port: DB host port.
-        database: DB name to access.
-    """
+    def __new__(
+            cls,
+            user=config.MYSQL_USER,
+            password=config.MYSQL_PASSWORD,
+            server=config.MYSQL_SERVER,
+            port=config.MYSQL_PORT,
+            db=config.MYSQL_DB):
 
-    def __init__(self, user, password, server, port, database):
-        self.engine = sqlalchemy.create_engine(
-            "mysql+pymysql://{USER}:{PASSWORD}@{SERVER}:{PORT}/{DB}?charset=utf8".format(
-                USER=user, PASSWORD=password, SERVER=server, PORT=port, DB=database))
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls)
 
-    def execute(self, query):
-        """ Run the specified query string and get all data.
+            engine = create_engine(
+                "mysql+pymysql://{USER}:{PASSWORD}@{SERVER}:{PORT}/{DB}?charset=utf8".format(
+                    USER=user,
+                    PASSWORD=password,
+                    SERVER=server,
+                    PORT=port,
+                    DB=db))
 
-        Args:
-            query: query string like "SELECT * from some_table;".
+            cls.__db_meta = MetaData(bind=engine)
+            cls.__db_meta.reflect()
 
-        Returns:
-            Got result like some array or table.
+            for name, table in cls.__db_meta.tables.items():
+                setattr(cls, name, table)
+
+        return cls.__instance
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def yield_requests(self):
+        """ Generator function which returns request records with below query.
+
+            SELECT Profile.name_, Profile.kana, Request.detail FROM User
+                INNER JOIN Profile ON User.id = Profile.user_id
+                INNER JOIN UsersRequest ON User.id = UsersRequest.user_id
+                INNER JOIN Request ON UsersRequest.request_id = Request.id;
         """
-        return self.engine.execute(query).fetchall()
+        columns = [self.Profile.c.name_, self.Profile.c.kana, self.Request.c.detail]
 
+        joined_query = self.User.join(self.Profile, self.User.c.id == self.Profile.c.user_id)
+        joined_query = joined_query.join(self.UsersRequest, self.User.c.id == self.UsersRequest.c.user_id)
+        joined_query = joined_query.join(self.Request, self.UsersRequest.c.request_id == self.Request.c.id)
+        joined_query = joined_query.select(self.User.c.id)
 
-_db = MySqlDriver(
-    user=config.MYSQL_USER,
-    password=config.MYSQL_PASSWORD,
-    server=config.MYSQL_SERVER,
-    port=config.MYSQL_PORT,
-    database=config.MYSQL_DB)
+        for record in joined_query.with_only_columns(columns).execute():
+            yield record
 
+    def yield_abilities(self):
+        """ Generator function which returns ability records with below query.
 
-class NeccoDbWrapper(object):
-    _QUERY_GET_REQUESTS = """
-        SELECT Profile.name_, Profile.kana, Request.detail FROM User
-            INNER JOIN Profile ON User.id = Profile.user_id
-            INNER JOIN UsersRequest ON User.id = UsersRequest.user_id
-            INNER JOIN Request ON UsersRequest.request_id = Request.id;"""
+            SELECT Profile.name_, Profile.kana, Ability.detail FROM User
+                INNER JOIN Profile ON Profile.user_id = User.id
+                INNER JOIN UsersAbility ON User.id = UsersAbility.user_id
+                INNER JOIN Ability ON UsersAbility.ability_id = Ability.id;
+        """
+        columns = [self.Profile.c.name_, self.Profile.c.kana, self.Ability.c.detail]
 
-    _QUERY_GET_ABILITIES = """
-        SELECT Profile.name_, Profile.kana, Ability.detail FROM Profile
-            INNER JOIN User ON Profile.user_id = User.id
-            INNER JOIN UsersAbility ON User.id = UsersAbility.user_id
-            INNER JOIN Ability ON UsersAbility.ability_id = Ability.id;"""
+        joined_query = self.User.join(self.Profile, self.User.c.id == self.Profile.c.user_id)
+        joined_query = joined_query.join(self.UsersAbility, self.User.c.id == self.UsersAbility.c.user_id)
+        joined_query = joined_query.join(self.Ability, self.UsersAbility.c.ability_id == self.Ability.c.id)
+        joined_query = joined_query.select(self.User.c.id)
 
-    def __init__(self, db_=_db):
-        self._db = db_
+        for record in joined_query.with_only_columns(columns).execute():
+            yield record
 
-    def get_requests(self):
-        return self._db.execute(self._QUERY_GET_REQUESTS)
+    def get_hashed_password(self, email):
+        proxy = self.User.select(self.User.c.email == email).execute()
 
-    def get_abilities(self):
-        return self._db.execute(self._QUERY_GET_ABILITIES)
-
-    def get_hashed_password(self, id_):
-        record = self._db.execute("SELECT password_ FROM User WHERE email = '{}'".format(id_))
-
-        if not record:
+        if not proxy.rowcount:
             return None
 
-        return record[0][0]
+        index = proxy.keys().index("password_")
+        password = proxy.fetchone()[index]
+
+        return password

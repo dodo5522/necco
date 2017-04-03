@@ -18,7 +18,7 @@
 import json
 from necco import config
 from necco.auth import PasswordAuthentication
-from necco.models import NeccoDbWrapper
+from necco.models import NeccoDatabase
 from flask import Flask, render_template, session, request, redirect
 import random
 import string
@@ -27,7 +27,7 @@ import string
 app = Flask(config.TITLE)
 app.secret_key = "".join([random.choice(string.ascii_lowercase + string.digits) for _ in range(128)])
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 3600
-model = NeccoDbWrapper()
+model = NeccoDatabase()
 
 
 @app.before_request
@@ -103,7 +103,7 @@ def logout():
 @app.route("/api/abilities", methods=["GET", ])
 def get_ability_list():
     columns = ["name", "kana", "detail"]
-    abilities = [{columns[i]: r[i] for i in range(3)} for r in model.get_abilities()]
+    abilities = [{columns[i]: r[i] for i in range(3)} for r in model.yield_abilities()]
 
     return json.dumps(abilities)
 
@@ -111,6 +111,6 @@ def get_ability_list():
 @app.route("/api/requests", methods=["GET", ])
 def get_request_list():
     columns = ["name", "kana", "detail"]
-    requests = [{columns[i]: r[i] for i in range(3)} for r in model.get_requests()]
+    requests = [{columns[i]: r[i] for i in range(3)} for r in model.yield_requests()]
 
     return json.dumps(requests)
