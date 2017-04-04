@@ -17,13 +17,15 @@
 
 import configparser
 
-_INIT = "necco.ini"
+_INIT = "/etc/necco/necco.ini"
 
 _parser = configparser.ConfigParser()
 _parser.read(_INIT)
 
 if len(_parser.sections()) is not 0:
     TITLE = _parser["GENERAL"]["TITLE"]
+    DOCROOT = _parser["GENERAL"]["DOCROOT"]
+
     MYSQL_DB = _parser["MYSQL"]["DB"]
     MYSQL_PORT = _parser["MYSQL"]["PORT"]
     MYSQL_SERVER = _parser["MYSQL"]["SERVER"]
@@ -32,6 +34,7 @@ if len(_parser.sections()) is not 0:
 else:
     _parser["GENERAL"] = {}
     TITLE = _parser["GENERAL"]["TITLE"] = "Title"
+    DOCROOT = _parser["GENERAL"]["DOCROOT"] = "/var/tmp/necco"
 
     _parser["MYSQL"] = {}
     MYSQL_DB = _parser["MYSQL"]["DB"] = "necco"

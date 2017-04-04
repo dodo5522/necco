@@ -20,6 +20,10 @@ from necco.views import app
 
 def main(host="0.0.0.0", port=5000, debug=False):
     app.debug = debug
+
+    if debug:
+        app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+
     app.run(host=host, port=port)
 
 
