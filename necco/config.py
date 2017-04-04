@@ -25,9 +25,9 @@ _parser.read(_INIT)
 if len(_parser.sections()) is not 0:
     TITLE = _parser["GENERAL"]["TITLE"]
     DOCROOT = _parser["GENERAL"]["DOCROOT"]
-
+    SECRET_KEY = _parser["GENERAL"]["SECRET_KEY"]
     MYSQL_DB = _parser["MYSQL"]["DB"]
-    MYSQL_PORT = _parser["MYSQL"]["PORT"]
+    MYSQL_PORT = int(_parser["MYSQL"]["PORT"])
     MYSQL_SERVER = _parser["MYSQL"]["SERVER"]
     MYSQL_USER = _parser["MYSQL"]["USER"]
     MYSQL_PASSWORD = _parser["MYSQL"]["PASSWORD"]
@@ -35,10 +35,11 @@ else:
     _parser["GENERAL"] = {}
     TITLE = _parser["GENERAL"]["TITLE"] = "Title"
     DOCROOT = _parser["GENERAL"]["DOCROOT"] = "/var/tmp/necco"
+    SECRET_KEY = _parser["GENERAL"]["SECRET_KEY"] = "necco temprary key"
 
     _parser["MYSQL"] = {}
     MYSQL_DB = _parser["MYSQL"]["DB"] = "necco"
-    MYSQL_PORT = _parser["MYSQL"]["PORT"] = 3306
+    MYSQL_PORT = _parser["MYSQL"]["PORT"] = "3306"
     MYSQL_SERVER = _parser["MYSQL"]["SERVER"] = "localhost"
     MYSQL_USER = _parser["MYSQL"]["USER"] = "guest"
     MYSQL_PASSWORD = _parser["MYSQL"]["PASSWORD"] = "guest's password"
