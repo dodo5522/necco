@@ -24,6 +24,7 @@ _parser.read(_INIT)
 
 if len(_parser.sections()) is not 0:
     TITLE = _parser["GENERAL"]["TITLE"]
+    SECRET_KEY = _parser["GENERAL"]["SECRET_KEY"]
     MYSQL_DB = _parser["MYSQL"]["DB"]
     MYSQL_PORT = _parser["MYSQL"]["PORT"]
     MYSQL_SERVER = _parser["MYSQL"]["SERVER"]
@@ -32,6 +33,7 @@ if len(_parser.sections()) is not 0:
 else:
     _parser["GENERAL"] = {}
     TITLE = _parser["GENERAL"]["TITLE"] = "Title"
+    SECRET_KEY = _parser["GENERAL"]["SECRET_KEY"] = "necco temprary key"
 
     _parser["MYSQL"] = {}
     MYSQL_DB = _parser["MYSQL"]["DB"] = "necco"

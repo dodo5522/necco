@@ -20,12 +20,10 @@ from necco import config
 from necco.auth import PasswordAuthentication
 from necco.models import NeccoDbWrapper
 from flask import Flask, render_template, session, request, redirect
-import random
-import string
 
 
 app = Flask(config.TITLE)
-app.secret_key = "".join([random.choice(string.ascii_lowercase + string.digits) for _ in range(128)])
+app.secret_key = config.SECRET_KEY
 model = NeccoDbWrapper()
 
 
