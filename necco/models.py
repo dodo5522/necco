@@ -98,3 +98,15 @@ class NeccoDatabase(object):
         password = proxy.fetchone()[index]
 
         return password
+
+    def yield_prefectures(self):
+        """ Generator function which returns prefectures with below query.
+
+            SELECT Prefecture.id, Prefecture.name_ FROM Prefecture;
+        """
+        columns = [self.Prefecture.c.id, self.Prefecture.c.name_]
+
+        query = self.Prefecture.select().with_only_columns(columns)
+
+        for record in query.execute():
+            yield record
