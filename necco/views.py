@@ -114,3 +114,16 @@ def get_request_list():
     requests = [{columns[i]: r[i] for i in range(3)} for r in model.yield_requests()]
 
     return json.dumps(requests)
+
+
+@app.route("/api/prefs", methods=["GET", ])
+def get_prefecture_list():
+    columns = ["id", "name"]
+    prefs = [{columns[i]: r[i] for i in range(len(columns))} for r in model.yield_prefectures()]
+
+    sending_obj = {
+        "length": len(prefs),
+        "prefectures": prefs
+    }
+
+    return json.dumps(sending_obj)
