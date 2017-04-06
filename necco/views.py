@@ -127,3 +127,18 @@ def get_prefecture_list():
     }
 
     return json.dumps(sending_obj)
+
+
+@app.route("/api/account", methods=["GET", ])
+def get_account():
+    return "Not implemented yet"
+
+
+@app.route("/api/account", methods=["POST", ])
+def create_account():
+    return "Not implemented yet"
+
+
+@app.route("/api/account", methods=["PUT", ])
+def update_account():
+    return "Not implemented yet"
