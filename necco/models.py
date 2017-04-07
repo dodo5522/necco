@@ -57,15 +57,15 @@ class NeccoDatabase(object):
 
             SELECT Profile.name_, Profile.kana, Request.detail FROM User
                 INNER JOIN Profile ON User.id = Profile.user_id
-                INNER JOIN UsersRequest ON User.id = UsersRequest.user_id
-                INNER JOIN Request ON UsersRequest.request_id = Request.id;
+                INNER JOIN UsersRequest ON User.id_ = UsersRequest.user_id
+                INNER JOIN Request ON UsersRequest.request_id = Request.id_;
         """
         columns = [self.Profile.c.name_, self.Profile.c.kana, self.Request.c.detail]
 
-        joined_query = self.User.join(self.Profile, self.User.c.id == self.Profile.c.user_id)
-        joined_query = joined_query.join(self.UsersRequest, self.User.c.id == self.UsersRequest.c.user_id)
-        joined_query = joined_query.join(self.Request, self.UsersRequest.c.request_id == self.Request.c.id)
-        joined_query = joined_query.select(self.User.c.id)
+        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.user_id)
+        joined_query = joined_query.join(self.UsersRequest, self.User.c.id_ == self.UsersRequest.c.user_id)
+        joined_query = joined_query.join(self.Request, self.UsersRequest.c.request_id == self.Request.c.id_)
+        joined_query = joined_query.select(self.User.c.id_)
 
         for record in joined_query.with_only_columns(columns).execute():
             yield record
@@ -74,16 +74,16 @@ class NeccoDatabase(object):
         """ Generator function which returns ability records with below query.
 
             SELECT Profile.name_, Profile.kana, Ability.detail FROM User
-                INNER JOIN Profile ON Profile.user_id = User.id
-                INNER JOIN UsersAbility ON User.id = UsersAbility.user_id
-                INNER JOIN Ability ON UsersAbility.ability_id = Ability.id;
+                INNER JOIN Profile ON Profile.user_id = User.id_
+                INNER JOIN UsersAbility ON User.id_ = UsersAbility.user_id
+                INNER JOIN Ability ON UsersAbility.ability_id = Ability.id_;
         """
         columns = [self.Profile.c.name_, self.Profile.c.kana, self.Ability.c.detail]
 
-        joined_query = self.User.join(self.Profile, self.User.c.id == self.Profile.c.user_id)
-        joined_query = joined_query.join(self.UsersAbility, self.User.c.id == self.UsersAbility.c.user_id)
-        joined_query = joined_query.join(self.Ability, self.UsersAbility.c.ability_id == self.Ability.c.id)
-        joined_query = joined_query.select(self.User.c.id)
+        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.user_id)
+        joined_query = joined_query.join(self.UsersAbility, self.User.c.id_ == self.UsersAbility.c.user_id)
+        joined_query = joined_query.join(self.Ability, self.UsersAbility.c.ability_id == self.Ability.c.id_)
+        joined_query = joined_query.select(self.User.c.id_)
 
         for record in joined_query.with_only_columns(columns).execute():
             yield record
@@ -102,9 +102,9 @@ class NeccoDatabase(object):
     def yield_prefectures(self):
         """ Generator function which returns prefectures with below query.
 
-            SELECT Prefecture.id, Prefecture.name_ FROM Prefecture;
+            SELECT Prefecture.id_, Prefecture.name_ FROM Prefecture;
         """
-        columns = [self.Prefecture.c.id, self.Prefecture.c.name_]
+        columns = [self.Prefecture.c.id_, self.Prefecture.c.name_]
 
         query = self.Prefecture.select().with_only_columns(columns)
 
