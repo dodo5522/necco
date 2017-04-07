@@ -101,29 +101,39 @@ def logout():
 
 
 @app.route("/api/abilities", methods=["GET", ])
-def get_ability_list():
+def get_abilities():
     columns = ["name", "kana", "detail"]
-    abilities = [{columns[i]: r[i] for i in range(3)} for r in model.yield_abilities()]
+    abilities = [{columns[i]: r[i] for i in range(len(columns))} for r in model.yield_abilities()]
 
-    return json.dumps(abilities)
+    sending_obj = {
+        "length": len(abilities),
+        "body": abilities
+    }
+
+    return json.dumps(sending_obj)
 
 
 @app.route("/api/requests", methods=["GET", ])
-def get_request_list():
+def get_requests():
     columns = ["name", "kana", "detail"]
-    requests = [{columns[i]: r[i] for i in range(3)} for r in model.yield_requests()]
+    requests = [{columns[i]: r[i] for i in range(len(columns))} for r in model.yield_requests()]
 
-    return json.dumps(requests)
+    sending_obj = {
+        "length": len(requests),
+        "body": requests
+    }
+
+    return json.dumps(sending_obj)
 
 
 @app.route("/api/prefs", methods=["GET", ])
-def get_prefecture_list():
+def get_prefectures():
     columns = ["id", "name"]
     prefs = [{columns[i]: r[i] for i in range(len(columns))} for r in model.yield_prefectures()]
 
     sending_obj = {
         "length": len(prefs),
-        "prefectures": prefs
+        "body": prefs
     }
 
     return json.dumps(sending_obj)
