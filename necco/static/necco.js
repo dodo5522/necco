@@ -64,7 +64,8 @@ $(function() {
       dataType: "json"});
 
     ret.done(function(res) {
-      var records = sortRecordsByKana(res);
+      var length = res.length;
+      var records = sortRecordsByKana(res.body);
       var body = $("<tbody>").appendTo(table);
 
       for(var record of records) {
@@ -98,7 +99,8 @@ $(function() {
       dataType: "json"});
 
     ret.done(function(res) {
-      var records = sortRecordsByKana(res);
+      var length = res.length;
+      var records = sortRecordsByKana(res.body);
       var body = $("<tbody>").appendTo(table);
 
       for(var record of records) {
