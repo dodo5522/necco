@@ -1,2 +1,7 @@
 .necco-content {
 }
+
+.settings-must {
+  color: red;
+  font-size: smaller;
+}
