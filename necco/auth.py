@@ -21,7 +21,16 @@ from werkzeug.security import check_password_hash
 
 class AbstractAuthentication(object):
     def __init__(self, id_, password):
-        self._is_authenticated = self._do_authentication(id_, password)
+        result = False
+
+        try:
+            result = self._do_authentication(id_, password)
+        except ValueError as e:
+            pass
+        except:
+            raise
+
+        self._is_authenticated = result
 
     def _do_authentication(self, id_, password):
         raise NotImplementedError
