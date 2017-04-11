@@ -92,7 +92,7 @@ class NeccoDatabase(object):
         proxy = self.User.select(self.User.c.email == email).execute()
 
         if not proxy.rowcount:
-            return None
+            raise ValueError("Account not found.")
 
         index = proxy.keys().index("password_")
         password = proxy.fetchone()[index]
