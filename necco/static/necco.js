@@ -67,14 +67,13 @@ $(function() {
       $("<th>").text(columns_j[i]).appendTo(tr)
     }
 
-    var ret = $.ajax({
+    $.ajax({
       type: "GET",
       url: "/api/" + type_,
-      dataType: "json"});
-
-    ret.done(function(res) {
-      var length = res.length;
-      var records = sortRecordsByKana(res.body);
+      dataType: "json"
+    }).done(function(data, text, jqxhr){
+      var length = data.length;
+      var records = sortRecordsByKana(data.body);
       var body = $("<tbody>").appendTo(table);
 
       for(var record of records) {
@@ -83,9 +82,7 @@ $(function() {
           $("<td>").text(record[columns[i]]).appendTo(tr);
         }
       }
-    });
-
-    ret.fail(function(res) {
+    }).fail(function(jqxhr, text, error){
     });
   });
 
@@ -102,14 +99,13 @@ $(function() {
       $("<th>").text(columns_j[i]).appendTo(tr)
     }
 
-    var ret = $.ajax({
+    $.ajax({
       type: "GET",
       url: "/api/" + type_,
-      dataType: "json"});
-
-    ret.done(function(res) {
-      var length = res.length;
-      var records = sortRecordsByKana(res.body);
+      dataType: "json"
+    }).done(function(data, text, jqxhr){
+      var length = data.length;
+      var records = sortRecordsByKana(data.body);
       var body = $("<tbody>").appendTo(table);
 
       for(var record of records) {
@@ -118,10 +114,10 @@ $(function() {
           $("<td>").text(record[columns[i]]).appendTo(tr);
         }
       }
+    }).fail(function(jqxhr, text, error){
     });
+  });
 
-    ret.fail(function(res) {
-    });
   });
 
   $("#navbar-item-passbook").addClass("active");
