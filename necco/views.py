@@ -141,7 +141,9 @@ def get_prefectures():
 
 @app.route("/api/account", methods=["GET", ])
 def get_account():
-    return "Not implemented yet"
+    email = session["username"]
+    user_info = model.get_user_account(email)
+    return json.dumps(user_info)
 
 
 @app.route("/api/account", methods=["POST", ])

@@ -110,3 +110,24 @@ class NeccoDatabase(object):
 
         for record in query.execute():
             yield record
+
+    def get_user_account(self, email):
+        """ Getter function returns the specified user infomation.
+
+            SELECT Profile.name_, Profile.kana, Profile.nickname, User.email, User.password_,
+                   Prefecture.name_, Profile.city, Profile.latitude, Profile.longitude, Profile.phone, Profile.fax
+                   from Profile inner join User on Profile.user_id = User.id_ inner join Prefecture on Profile.prefecture_id = Prefecture.id_;
+        """
+        columns = [
+            self.Profile.c.name_, self.Profile.c.kana, self.Profile.c.nickname,
+            self.User.c.email, self.User.c.password_, self.Prefecture.c.name_,
+            self.Profile.c.city, self.Profile.c.latitude, self.Profile.c.longitude,
+            self.Profile.c.phone, self.Profile.c.fax]
+
+        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.user_id)
+        joined_query = joined_query.join(self.Prefecture, self.Profile.c.prefecture_id == self.Prefecture.c.id_)
+        joined_query = joined_query.select(self.User.c.email == email).with_only_columns(columns)
+
+        record = joined_query.execute().fetchone()
+
+        return {str(key): str(value) for key, value in zip(columns, record)}

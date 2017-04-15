@@ -48,6 +48,24 @@ $(function() {
       url: "/api/account",
       dataType: "json"
     }).done(function(data, text, jqxhr){
+      $("#name1").val(data["Profile.name_"].split(" ")[0]);
+      $("#name2").val(data["Profile.name_"].split(" ")[1]);
+      $("#kana1").val(data["Profile.kana"].split(" ")[0]);
+      $("#kana2").val(data["Profile.kana"].split(" ")[1]);
+      $("#nickname").val(data["Profile.nickname"]);
+      $("#email").val(data["User.email"]);
+      //$("#password").val(data["User.password_"]);
+      $("#password").val(data["User.password_"]);
+      $("#pref").val(data["Prefecture.name_"]);
+      $("#addr1").val(data["Profile.city"]);
+      $("#longitude").val(data["Profile.longitude"]);
+      $("#latitude").val(data["Profile.latitude"]);
+      $("#tel1").val(data["Profile.phone"].split("-")[0]);
+      $("#tel2").val(data["Profile.phone"].split("-")[1]);
+      $("#tel3").val(data["Profile.phone"].split("-")[2]);
+      $("#fax1").val(data["Profile.fax"].split("-")[0]);
+      $("#fax2").val(data["Profile.fax"].split("-")[1]);
+      $("#fax3").val(data["Profile.fax"].split("-")[2]);
     }).fail(function(jqxhr, text, error){
     });
 
