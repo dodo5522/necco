@@ -28,7 +28,8 @@ class NeccoDatabase(object):
             password=config.MYSQL_PASSWORD,
             server=config.MYSQL_SERVER,
             port=config.MYSQL_PORT,
-            db=config.MYSQL_DB):
+            db=config.MYSQL_DB,
+            url=None):
 
         if cls.__instance is None:
             cls.__instance = object.__new__(cls)
@@ -39,7 +40,7 @@ class NeccoDatabase(object):
                     PASSWORD=password,
                     SERVER=server,
                     PORT=port,
-                    DB=db))
+                    DB=db)) if url is None else create_engine(url)
 
             cls.__db_meta = MetaData(bind=engine)
             cls.__db_meta.reflect()
