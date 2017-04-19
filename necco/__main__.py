@@ -29,7 +29,7 @@ def configure_necco_app():
     app.jinja_loader = FileSystemLoader([config.DOCROOT, ])
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 3600
 
-    def prefix():
+    def before_request():
         """ Function to be called before running app.route().
         """
         if "username" in session:
@@ -41,7 +41,7 @@ def configure_necco_app():
 
         return redirect("/login")
 
-    app.before_request(prefix)
+    app.before_request(before_request)
 
     app.add_url_rule(rule="/login", view_func=LoginView.as_view("login"))
     app.add_url_rule(rule="/logout", view_func=LogoutView.as_view("logout"))
