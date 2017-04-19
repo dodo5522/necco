@@ -80,79 +80,8 @@ class MainView(View):
             records=records)
 
 
-#class ApiView(View):
-#    def __init__(self, app=None, db=None, *args, **kwargs):
-#        super(ApiView, self).__init__(app=app)
-#        self._db = db
-#        app.add_url_rule(rule="/api", view_func=self.as_view(""))
-#
-#    def get_abilities(self):
-#        columns = ["name", "kana", "detail"]
-#        abilities = [{columns[i]: r[i] for i in range(len(columns))} for r in self.db.yield_abilities()]
-#
-#        sending_obj = {
-#            "length": len(abilities),
-#            "body": abilities
-#        }
-#
-#        return json.dumps(sending_obj)
-#
-#    @_app.route("/api/requests", methods=["GET", ])
-#    def get_requests(self):
-#        columns = ["name", "kana", "detail"]
-#        requests = [{columns[i]: r[i] for i in range(len(columns))} for r in self.db.yield_requests()]
-#
-#        sending_obj = {
-#            "length": len(requests),
-#            "body": requests
-#        }
-#
-#        return json.dumps(sending_obj)
-#
-#    @_app.route("/api/prefs", methods=["GET", ])
-#    def get_prefectures(self):
-#        columns = ["id", "name"]
-#        prefs = [{columns[i]: r[i] for i in range(len(columns))} for r in self.db.yield_prefectures()]
-#
-#        sending_obj = {
-#            "length": len(prefs),
-#            "body": prefs
-#        }
-#
-#        return json.dumps(sending_obj)
-#
-#    @_app.route("/api/account", methods=["GET", ])
-#    def get_account(self):
-#        email = session["username"]
-#        user_info = self.db.get_user_account(email)
-#        return json.dumps(user_info)
-#
-#    @_app.route("/api/account", methods=["POST", ])
-#    def create_account():
-#        got = {key: item for key, item in request.form.items()}
-#        return json.dumps(got)
-#
-#    @_app.route("/api/account", methods=["PUT", ])
-#    def update_account():
-#        return "Not implemented yet"
-#
-#
-#class DebugView(View):
-#    def __init__(self, *args, **kwargs):
-#        pass
-#
-#    @_app.after_request
-#    def add_header(r):
-#        """
-#        Add headers to both force latest IE rendering engine or Chrome Frame,
-#        and also to cache the rendered page for 10 minutes.
-#        """
-#        r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-#        r.headers["Pragma"] = "no-cache"
-#        r.headers["Expires"] = "0"
-#        r.headers['Cache-Control'] = 'public, max-age=0'
-#        return r
-#
-#    @_app.route("/api/temp", methods=["GET", ])
-#    def get_temp():
-#        return json.dumps(request.args)
+class DebugView(MethodView):
+    """ for route of /temp """
+
+    def get(self):
+        return json.dumps(request.args)

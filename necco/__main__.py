@@ -18,7 +18,8 @@
 from flask import Flask, session, request, redirect
 from jinja2 import FileSystemLoader
 from necco import config
-from necco.views import LoginView, LogoutView, MainView
+from necco.views import LoginView, LogoutView, MainView, DebugView
+from necco.api import AbilityApi, RequestApi, PrefectureApi, AccountApi
 
 
 def configure_necco_app():
@@ -45,6 +46,11 @@ def configure_necco_app():
     app.add_url_rule(rule="/login", view_func=LoginView.as_view("login"))
     app.add_url_rule(rule="/logout", view_func=LogoutView.as_view("logout"))
     app.add_url_rule(rule="/", view_func=MainView.as_view("index"))
+    app.add_url_rule(rule="/api/abilities", view_func=AbilityApi.as_view("abilities"))
+    app.add_url_rule(rule="/api/requests", view_func=RequestApi.as_view("requests"))
+    app.add_url_rule(rule="/api/prefs", view_func=PrefectureApi.as_view("prefs"))
+    app.add_url_rule(rule="/api/account", view_func=AccountApi.as_view("account"))
+    app.add_url_rule(rule="/temp", view_func=DebugView.as_view("temp"))
 
     return app
 
