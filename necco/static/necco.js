@@ -54,8 +54,6 @@ $(function() {
       $("#kana2").val(data["Profile.kana"].split(" ")[1]);
       $("#nickname").val(data["Profile.nickname"]);
       $("#email").val(data["User.email"]);
-      //$("#password").val(data["User.password_"]);
-      $("#password").val(data["User.password_"]);
       $("#pref").val(data["Prefecture.name_"]);
       $("#addr1").val(data["Profile.city"]);
       $("#longitude").val(data["Profile.longitude"]);
