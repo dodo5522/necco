@@ -19,7 +19,7 @@ from necco import config
 from sqlalchemy import create_engine, MetaData
 
 
-class NeccoDatabase(object):
+class Database(object):
     __instance = None
 
     def __new__(

@@ -15,7 +15,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from necco.models import NeccoDatabase
+from necco.models import Database
 from werkzeug.security import check_password_hash
 
 
@@ -41,7 +41,7 @@ class AbstractAuthentication(object):
 
 class PasswordAuthentication(AbstractAuthentication):
     def __init__(self, id_, password):
-        self._db = NeccoDatabase()
+        self._db = Database()
         super(PasswordAuthentication, self).__init__(id_, password)
 
     def _do_authentication(self, id_, password):
