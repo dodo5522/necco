@@ -134,7 +134,5 @@ $(function() {
     });
   });
 
-  });
-
   $("#navbar-item-passbook").addClass("active");
 });
