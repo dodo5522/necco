@@ -66,7 +66,7 @@ class Database(object):
         joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.user_id)
         joined_query = joined_query.join(self.UsersRequest, self.User.c.id_ == self.UsersRequest.c.user_id)
         joined_query = joined_query.join(self.Request, self.UsersRequest.c.request_id == self.Request.c.id_)
-        joined_query = joined_query.select(self.User.c.id_)
+        joined_query = joined_query.select()
 
         for record in joined_query.with_only_columns(columns).execute():
             yield record
@@ -84,7 +84,7 @@ class Database(object):
         joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.user_id)
         joined_query = joined_query.join(self.UsersAbility, self.User.c.id_ == self.UsersAbility.c.user_id)
         joined_query = joined_query.join(self.Ability, self.UsersAbility.c.ability_id == self.Ability.c.id_)
-        joined_query = joined_query.select(self.User.c.id_)
+        joined_query = joined_query.select()
 
         for record in joined_query.with_only_columns(columns).execute():
             yield record
