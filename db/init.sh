@@ -1,11 +1,15 @@
 #!/bin/bash
 
+DB_FOR_TEST='/tmp/necco_test.db'
+SCHEME_FOR_TEST="$(dirname ${DB_FOR_TEST})/scheme.sql"
+
 function show_help() {
-    echo $0 [-D] [-d DATABASE] [-u LOGIN_USER] [-p PASSWORD]
+    echo $0 [-D] [-t] [-d DATABASE] [-u LOGIN_USER] [-p PASSWORD]
 }
 
 function parse_args() {
     local IS_DELETE_ALL=0
+    local IS_TEST=0
     local DB=necco
     local USER=temp
     local PASSWORD=temp
@@ -28,6 +32,10 @@ function parse_args() {
                 shift
                 PASSWORD=${1}
                 ;;
+            '-t' | '--test' )
+                shift
+                IS_TEST=1
+                ;;
             * )
                 ;;
         esac
@@ -36,40 +44,61 @@ function parse_args() {
         if [ -z "${1}" ]; then break; fi
     done
 
-    echo ${IS_DELETE_ALL} ${DB} ${USER} ${PASSWORD}
+    echo ${IS_TEST} ${IS_DELETE_ALL} ${DB} ${USER} ${PASSWORD}
 }
 
 function create_db() {
-    local USER=$1
-    local PASSWORD=$2
-    local SCHEME=$3
-    local VALUES_DIR=$4
-    local MYSQL="mysql -p${PASSWORD} -u ${USER}"
+    local IS_TEST=$1
+    local SCHEME=$2
+    local DATA_DIR=$3
+    local USER=$4
+    local PASSWORD=$5
+    local DB_COMMAND=''
 
-    # create all table
-    ${MYSQL} < ${SCHEME}
+    if [ ${IS_TEST} -ne 0 ]; then
+        DB_COMMAND="sqlite3 ${DB_FOR_TEST}"
+        cat ${SCHEME} | \
+            sed -e '/^CREATE DATABASE /d' | \
+            sed -e '/^USE /d' | \
+            sed -e 's/ INT / INTEGER /g' | \
+            sed -e 's/ BIGINT / INTEGER /g' | \
+            sed -e 's/ UNSIGNED / /g' | \
+            sed -e 's/ AUTO_INCREMENT */ AUTOINCREMENT /g' \
+            > ${SCHEME_FOR_TEST}
+        ${DB_COMMAND} < ${SCHEME_FOR_TEST}
+    else
+        DB_COMMAND="mysql -p${PASSWORD} -u ${USER}"
+        ${DB_COMMAND} < ${SCHEME}
+        DB_COMMAND="${DB_COMMAND} ${DB} -e"
+    fi
 
-    for TABLE in $(ls ${VALUES_DIR} | sed -e 's/\.txt//g')
+    for TABLE in $(ls ${DATA_DIR} | sed -e 's/\.txt//g')
     do
         echo initializing ${TABLE}...
-        cat ${VALUES_DIR}/${TABLE}.txt | while read VALUES
+        cat ${DATA_DIR}/${TABLE}.txt | while read VALUES
         do
             if [[ "${VALUES}" =~ ^# ]]; then
+                COLUMNS=$(echo ${VALUES} | sed -e 's/^#//')
                 continue
             fi
-            ${MYSQL} ${DB} -e "INSERT INTO ${TABLE} VALUES (${VALUES})"
+            ${DB_COMMAND} "INSERT INTO ${TABLE}(${COLUMNS}) VALUES (${VALUES})"
         done
     done
 }
 
 function delete_db() {
-    local USER=$1
-    local PASSWORD=$2
-    local DB=$3
-    local MYSQL="mysql -p${PASSWORD} -u ${USER}"
+    local IS_TEST=$1
+    local USER=$2
+    local PASSWORD=$3
+    local DB=$4
+    local DB_COMMAND="mysql -p${PASSWORD} -u ${USER}"
 
-    # create all table
-    echo "DROP DATABASE ${DB};" | ${MYSQL}
+    if [ ${IS_TEST} -eq 0 ]; then
+        echo "DROP DATABASE ${DB};" | ${DB_COMMAND}
+    else
+        echo Deleting ${DB_FOR_TEST}...
+        rm -f ${DB_FOR_TEST}
+    fi
 }
 
 if [[ "${@}" =~ .*\ (-h|help)\ .* ]]; then
@@ -78,13 +107,20 @@ if [[ "${@}" =~ .*\ (-h|help)\ .* ]]; then
 fi
 
 RES=($(parse_args ${@}))
-IS_DELETE_ALL=${RES[0]}
-DB=${RES[1]}
-USER=${RES[2]}
-PASSWORD=${RES[3]}
+IS_TEST=${RES[0]}
+IS_DELETE_ALL=${RES[1]}
+DB=${RES[2]}
+USER=${RES[3]}
+PASSWORD=${RES[4]}
+
+if [ ${IS_TEST} -ne 0 ]; then
+    DATA_DIR='test_data'
+else
+    DATA_DIR='data'
+fi
 
 if [ ${IS_DELETE_ALL} -eq 0 ]; then
-    create_db ${USER} ${PASSWORD} scheme.sql values
+    create_db ${IS_TEST} scheme.sql ${DATA_DIR} ${USER} ${PASSWORD}
 else
-    delete_db ${USER} ${PASSWORD} ${DB}
+    delete_db ${IS_TEST} ${USER} ${PASSWORD} ${DB}
 fi

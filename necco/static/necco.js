@@ -1,16 +1,40 @@
+var activateNavbarItem = function(elementId) {
+  var activeItem = $("#navbar-item-list").children("li.active");
+  var targetItem = $(elementId);
+  activeItem.removeClass("active");
+  targetItem.addClass("active");
+};
+
+var showContent = function(idContent) {
+  $(".necco-content").css("display", "none");
+  $(idContent).css("display", "");
+};
+
+var prepareContent = function(type_) {
+  activateNavbarItem("#navbar-item-" + type_);
+  showContent("#id-necco-content-" + type_);
+
+  var content = $("#id-necco-content-" + type_);
+  content.empty();
+
+  var table = $("<table>").appendTo(content);
+  table.addClass("table");
+  table.addClass("table-responsive");
+  table.addClass("table-hover");
+
+  return table;
+};
+
+var sortRecordsByKana = function(records) {
+  return records.sort(
+    function(first, second) {
+      if(first.kana > second.kana) { return 1; }
+      else if(first.kana < second.kana) { return -1; }
+      else { return 0; }
+    })
+};
+
 $(function() {
-  var activateNavbarItem = function(elementId) {
-    var activeItem = $("#navbar-item-list").children("li.active");
-    var targetItem = $(elementId);
-    activeItem.removeClass("active");
-    targetItem.addClass("active");
-  };
-
-  var showContent = function(idContent) {
-    $(".necco-content").css("display", "none");
-    $(idContent).css("display", "");
-  };
-
   $("#navbar-item-passbook").on("click", function() {
     activateNavbarItem("#navbar-item-passbook");
     showContent("#id-necco-content-passbook");
@@ -18,32 +42,33 @@ $(function() {
 
   $("#navbar-item-settings").on("click", function() {
     activateNavbarItem("#navbar-item-settings");
+
+    $.ajax({
+      type: "GET",
+      url: "/api/account",
+      dataType: "json"
+    }).done(function(data, text, jqxhr){
+      $("#name1").val(data["Profile.name_"].split(" ")[0]);
+      $("#name2").val(data["Profile.name_"].split(" ")[1]);
+      $("#kana1").val(data["Profile.kana"].split(" ")[0]);
+      $("#kana2").val(data["Profile.kana"].split(" ")[1]);
+      $("#nickname").val(data["Profile.nickname"]);
+      $("#email").val(data["User.email"]);
+      $("#pref").val(data["Prefecture.name_"]);
+      $("#addr1").val(data["Profile.city"]);
+      $("#longitude").val(data["Profile.longitude"]);
+      $("#latitude").val(data["Profile.latitude"]);
+      $("#tel1").val(data["Profile.phone"].split("-")[0]);
+      $("#tel2").val(data["Profile.phone"].split("-")[1]);
+      $("#tel3").val(data["Profile.phone"].split("-")[2]);
+      $("#fax1").val(data["Profile.fax"].split("-")[0]);
+      $("#fax2").val(data["Profile.fax"].split("-")[1]);
+      $("#fax3").val(data["Profile.fax"].split("-")[2]);
+    }).fail(function(jqxhr, text, error){
+    });
+
     showContent("#id-necco-content-settings");
   });
-
-  var prepareContent = function(type_) {
-    activateNavbarItem("#navbar-item-" + type_);
-    showContent("#id-necco-content-" + type_);
-
-    var content = $("#id-necco-content-" + type_);
-    content.empty();
-
-    var table = $("<table>").appendTo(content);
-    table.addClass("table");
-    table.addClass("table-responsive");
-    table.addClass("table-hover");
-
-    return table;
-  };
-
-  var sortRecordsByKana = function(records) {
-    return records.sort(
-      function(first, second) {
-        if(first.kana > second.kana) { return 1; }
-        else if(first.kana < second.kana) { return -1; }
-        else { return 0; }
-      })
-    };
 
   $("#navbar-item-abilities").on("click", function() {
     var type_ = "abilities";
@@ -58,14 +83,13 @@ $(function() {
       $("<th>").text(columns_j[i]).appendTo(tr)
     }
 
-    var ret = $.ajax({
+    $.ajax({
       type: "GET",
       url: "/api/" + type_,
-      dataType: "json"});
-
-    ret.done(function(res) {
-      var length = res.length;
-      var records = sortRecordsByKana(res.body);
+      dataType: "json"
+    }).done(function(data, text, jqxhr){
+      var length = data.length;
+      var records = sortRecordsByKana(data.body);
       var body = $("<tbody>").appendTo(table);
 
       for(var record of records) {
@@ -74,9 +98,7 @@ $(function() {
           $("<td>").text(record[columns[i]]).appendTo(tr);
         }
       }
-    });
-
-    ret.fail(function(res) {
+    }).fail(function(jqxhr, text, error){
     });
   });
 
@@ -93,14 +115,13 @@ $(function() {
       $("<th>").text(columns_j[i]).appendTo(tr)
     }
 
-    var ret = $.ajax({
+    $.ajax({
       type: "GET",
       url: "/api/" + type_,
-      dataType: "json"});
-
-    ret.done(function(res) {
-      var length = res.length;
-      var records = sortRecordsByKana(res.body);
+      dataType: "json"
+    }).done(function(data, text, jqxhr){
+      var length = data.length;
+      var records = sortRecordsByKana(data.body);
       var body = $("<tbody>").appendTo(table);
 
       for(var record of records) {
@@ -109,10 +130,10 @@ $(function() {
           $("<td>").text(record[columns[i]]).appendTo(tr);
         }
       }
+    }).fail(function(jqxhr, text, error){
     });
+  });
 
-    ret.fail(function(res) {
-    });
   });
 
   $("#navbar-item-passbook").addClass("active");

@@ -19,7 +19,7 @@ from necco import config
 from sqlalchemy import create_engine, MetaData
 
 
-class NeccoDatabase(object):
+class Database(object):
     __instance = None
 
     def __new__(
@@ -28,7 +28,8 @@ class NeccoDatabase(object):
             password=config.MYSQL_PASSWORD,
             server=config.MYSQL_SERVER,
             port=config.MYSQL_PORT,
-            db=config.MYSQL_DB):
+            db=config.MYSQL_DB,
+            url=None):
 
         if cls.__instance is None:
             cls.__instance = object.__new__(cls)
@@ -39,7 +40,7 @@ class NeccoDatabase(object):
                     PASSWORD=password,
                     SERVER=server,
                     PORT=port,
-                    DB=db))
+                    DB=db)) if url is None else create_engine(url)
 
             cls.__db_meta = MetaData(bind=engine)
             cls.__db_meta.reflect()
@@ -65,7 +66,7 @@ class NeccoDatabase(object):
         joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.user_id)
         joined_query = joined_query.join(self.UsersRequest, self.User.c.id_ == self.UsersRequest.c.user_id)
         joined_query = joined_query.join(self.Request, self.UsersRequest.c.request_id == self.Request.c.id_)
-        joined_query = joined_query.select(self.User.c.id_)
+        joined_query = joined_query.select()
 
         for record in joined_query.with_only_columns(columns).execute():
             yield record
@@ -83,7 +84,7 @@ class NeccoDatabase(object):
         joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.user_id)
         joined_query = joined_query.join(self.UsersAbility, self.User.c.id_ == self.UsersAbility.c.user_id)
         joined_query = joined_query.join(self.Ability, self.UsersAbility.c.ability_id == self.Ability.c.id_)
-        joined_query = joined_query.select(self.User.c.id_)
+        joined_query = joined_query.select()
 
         for record in joined_query.with_only_columns(columns).execute():
             yield record
@@ -110,3 +111,24 @@ class NeccoDatabase(object):
 
         for record in query.execute():
             yield record
+
+    def get_user_account(self, email):
+        """ Getter function returns the specified user infomation.
+
+            SELECT Profile.name_, Profile.kana, Profile.nickname, User.email, User.password_,
+                   Prefecture.name_, Profile.city, Profile.latitude, Profile.longitude, Profile.phone, Profile.fax
+                   from Profile inner join User on Profile.user_id = User.id_ inner join Prefecture on Profile.prefecture_id = Prefecture.id_;
+        """
+        columns = [
+            self.Profile.c.name_, self.Profile.c.kana, self.Profile.c.nickname,
+            self.User.c.email, self.User.c.password_, self.Prefecture.c.name_,
+            self.Profile.c.city, self.Profile.c.latitude, self.Profile.c.longitude,
+            self.Profile.c.phone, self.Profile.c.fax]
+
+        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.user_id)
+        joined_query = joined_query.join(self.Prefecture, self.Profile.c.prefecture_id == self.Prefecture.c.id_)
+        joined_query = joined_query.select(self.User.c.email == email).with_only_columns(columns)
+
+        record = joined_query.execute().fetchone()
+
+        return {str(key): str(value) for key, value in zip(columns, record)}
