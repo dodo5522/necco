@@ -5,9 +5,17 @@ var activateNavbarItem = function(elementId) {
   targetItem.addClass("active");
 };
 
+var hideContent = function() {
+  $(".necco-content").css("display", "none");
+  $(".overlay").css("display", "");
+  $(".loading").css("display", "");
+};
+
 var showContent = function(idContent) {
   $(".necco-content").css("display", "none");
-  $(idContent).css("display", "");
+  $(".overlay").fadeOut();
+  $(".loading").fadeOut();
+  $(idContent).fadeIn();
 };
 
 var prepareContent = function(type_) {
@@ -36,11 +44,13 @@ var sortRecordsByKana = function(records) {
 
 $(function() {
   $("#navbar-item-passbook").on("click", function() {
+    hideContent();
     activateNavbarItem("#navbar-item-passbook");
     showContent("#id-necco-content-passbook");
   });
 
   $("#navbar-item-settings").on("click", function() {
+    hideContent();
     activateNavbarItem("#navbar-item-settings");
 
     $.ajax({
@@ -64,13 +74,15 @@ $(function() {
       $("#fax1").val(data["Profile.fax"].split("-")[0]);
       $("#fax2").val(data["Profile.fax"].split("-")[1]);
       $("#fax3").val(data["Profile.fax"].split("-")[2]);
+      showContent("#id-necco-content-settings");
     }).fail(function(jqxhr, text, error){
+      showContent("#id-necco-content-settings");
     });
-
-    showContent("#id-necco-content-settings");
   });
 
   $("#navbar-item-abilities").on("click", function() {
+    hideContent();
+
     var type_ = "abilities";
     var table = prepareContent(type_);
 
@@ -99,11 +111,16 @@ $(function() {
           $("<td>").text(record[columns[i]]).appendTo(tr);
         }
       }
+
+      showContent("#id-necco-content-abilities");
     }).fail(function(jqxhr, text, error){
+      showContent("#id-necco-content-abilities");
     });
   });
 
   $("#navbar-item-requests").on("click", function() {
+    hideContent();
+
     var type_ = "requests";
     var table = prepareContent(type_);
 
@@ -132,9 +149,17 @@ $(function() {
           $("<td>").text(record[columns[i]]).appendTo(tr);
         }
       }
+
+      showContent("#id-necco-content-requests");
     }).fail(function(jqxhr, text, error){
+      showContent("#id-necco-content-requests");
     });
   });
 
+});
+
+$(window).on("load", function() {
+  hideContent();
   $("#navbar-item-passbook").addClass("active");
+  showContent("#id-content-passbook");
 });

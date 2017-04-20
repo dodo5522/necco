@@ -1,0 +1,29 @@
+<table class="table table-responsive table-hover">
+  <thead>
+    <tr>
+      <th>いつ</th>
+      <th>誰から</th>
+      <th>誰に</th>
+      <th>何を</th>
+      <th>いくらで</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for record in records %}
+    <tr>
+      <td>{{ record["dealed_at"] }}</td>
+      <td>{{ record["from_whom"] }}</td>
+      <td>{{ record["to_whom"] }}</td>
+      <td>{{ record["what"] }}</td>
+      <td>
+        {% if record["price_yen"] != 0 %}
+          {{ record["price_yen"] }}円と
+        {%- endif %}
+        {% if record["price_necco"] != 0 %}
+          {{ record["price_necco"] }}ねっこ
+        {%- endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
