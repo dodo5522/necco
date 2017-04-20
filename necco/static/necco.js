@@ -70,6 +70,16 @@ $(function() {
     showContent("#id-necco-content-settings");
   });
 
+  $("#button-update-account").on("click", function() {
+    var sending_data = $("#form-account").serializeArray();
+    //var ret = $.ajax({
+    //  type: "POST",
+    //  url: "/api/account",
+    //  dataType: "json",
+    //  data: "",
+    //});
+  });
+
   $("#navbar-item-abilities").on("click", function() {
     var type_ = "abilities";
     var table = prepareContent(type_);
