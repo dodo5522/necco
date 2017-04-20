@@ -1,7 +1,10 @@
 {% extends "layout.html" %}
 {% block body %}
 
+<div class="loading"><img src="{{ url_for('static', filename='loading.gif') }}"></div>
+
 <div class="necco-content" id="id-necco-content-passbook">
+  <div class="overlay"></div>
   <table class="table table-responsive table-hover">
     <thead>
       <tr>
@@ -31,17 +34,22 @@
       {% endfor %}
     </tbody>
   </table>
+  {% include "pagenation.html" %}
 </div>
 
-<div class="necco-content" id="id-necco-content-settings" style="display:none">
+<div class="necco-content" id="id-necco-content-settings">
+  <div class="overlay"></div>
   {% include "settings.html" %}
 </div>
 
-<div class="necco-content" id="id-necco-content-abilities" style="display:none">
+<div class="necco-content" id="id-necco-content-abilities">
+  <div class="overlay"></div>
+  {% include "pagenation.html" %}
 </div>
 
-<div class="necco-content" id="id-necco-content-requests" style="display:none">
+<div class="necco-content" id="id-necco-content-requests">
+  <div class="overlay"></div>
+  {% include "pagenation.html" %}
 </div>
 
-{% include "pagenation.html" %}
 {% endblock %}
