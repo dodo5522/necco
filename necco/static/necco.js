@@ -74,6 +74,7 @@ $(function() {
     var type_ = "abilities";
     var table = prepareContent(type_);
 
+    // TODO: columnsもGETするように
     columns = new Array("name", "kana", "detail");
     columns_j = new Array("名前", "よみ", "できること");
 
@@ -106,6 +107,7 @@ $(function() {
     var type_ = "requests";
     var table = prepareContent(type_);
 
+    // TODO: columnsもGETするように
     columns = new Array("name", "kana", "detail");
     columns_j = new Array("名前", "よみ", "してほしいこと");
 
