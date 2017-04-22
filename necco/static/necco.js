@@ -1,5 +1,5 @@
 var activateNavbarItem = function(elementId) {
-  var activeItem = $("#navbar-item-list").children("li.active");
+  var activeItem = $("#navbarItemList").children("li.active");
   var targetItem = $(elementId);
   activeItem.removeClass("active");
   targetItem.addClass("active");
@@ -11,10 +11,10 @@ var showContent = function(idContent) {
 };
 
 var prepareContent = function(type_) {
-  activateNavbarItem("#navbar-item-" + type_);
-  showContent("#id-necco-content-" + type_);
+  activateNavbarItem("#navbarItem" + type_);
+  showContent("#content" + type_);
 
-  var content = $("#id-necco-content-" + type_);
+  var content = $("#content" + type_);
   content.empty();
 
   var table = $("<table>").appendTo(content);
@@ -35,39 +35,35 @@ var sortRecordsByKana = function(records) {
 };
 
 $(function() {
-  $("#navbar-item-passbook").on("click", function() {
-    activateNavbarItem("#navbar-item-passbook");
-    showContent("#id-necco-content-passbook");
+  $("#navbarItemPassbook").on("click", function() {
+    activateNavbarItem("#navbarItemPassbook");
+    showContent("#contentPassbook");
   });
 
-  $("#navbar-item-settings").on("click", function() {
-    activateNavbarItem("#navbar-item-settings");
+  $("#navbarItemSettings").on("click", function() {
+    activateNavbarItem("#navbarItemSettings");
 
     $.ajax({
       type: "GET",
       url: "/api/account",
       dataType: "json"
     }).done(function(data, text, jqxhr){
-      $("#name1").val(data["Profile.name_"].split(" ")[0]);
-      $("#name2").val(data["Profile.name_"].split(" ")[1]);
-      $("#kana1").val(data["Profile.kana"].split(" ")[0]);
-      $("#kana2").val(data["Profile.kana"].split(" ")[1]);
-      $("#nickname").val(data["Profile.nickname"]);
+      $("#lastName").val(data["Profile.name_"].split(" ")[0]);
+      $("#firstName").val(data["Profile.name_"].split(" ")[1]);
+      $("#lastKanaName").val(data["Profile.kana"].split(" ")[0]);
+      $("#firstKanaName").val(data["Profile.kana"].split(" ")[1]);
+      $("#nickName").val(data["Profile.nickname"]);
       $("#email").val(data["User.email"]);
-      $("#pref").val(data["Prefecture.name_"]);
-      $("#addr1").val(data["Profile.city"]);
-      $("#longitude").val(data["Profile.longitude"]);
-      $("#latitude").val(data["Profile.latitude"]);
-      $("#tel1").val(data["Profile.phone"].split("-")[0]);
-      $("#tel2").val(data["Profile.phone"].split("-")[1]);
-      $("#tel3").val(data["Profile.phone"].split("-")[2]);
-      $("#fax1").val(data["Profile.fax"].split("-")[0]);
-      $("#fax2").val(data["Profile.fax"].split("-")[1]);
-      $("#fax3").val(data["Profile.fax"].split("-")[2]);
+      $("#prefecture").val(data["Prefecture.name_"]);
+      $("#address").val(data["Profile.city"]);
+      $("#streetAddress").val(data["Profile.city"]);
+      $("#phoneNumber").val(data["Profile.phone"]);
+      $("#faxNumber").val(data["Profile.fax"]);
+      $("#profile").val(data["Profile.profile"]);
     }).fail(function(jqxhr, text, error){
     });
 
-    showContent("#id-necco-content-settings");
+    showContent("#contentSettings");
   });
 
   $("#button-update-account").on("click", function() {
@@ -80,8 +76,8 @@ $(function() {
     //});
   });
 
-  $("#navbar-item-abilities").on("click", function() {
-    var type_ = "abilities";
+  $("#navbarItemAbilities").on("click", function() {
+    var type_ = "Abilities";
     var table = prepareContent(type_);
 
     // TODO: columnsもGETするように
@@ -113,8 +109,8 @@ $(function() {
     });
   });
 
-  $("#navbar-item-requests").on("click", function() {
-    var type_ = "requests";
+  $("#navbarItemRequests").on("click", function() {
+    var type_ = "Requests";
     var table = prepareContent(type_);
 
     // TODO: columnsもGETするように
@@ -146,5 +142,5 @@ $(function() {
     });
   });
 
-  $("#navbar-item-passbook").addClass("active");
+  $("#navbarItemPassbook").addClass("active");
 });

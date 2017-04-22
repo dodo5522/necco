@@ -123,7 +123,7 @@ class Database(object):
             self.Profile.c.name_, self.Profile.c.kana, self.Profile.c.nickname,
             self.User.c.email, self.User.c.password_, self.Prefecture.c.name_,
             self.Profile.c.city, self.Profile.c.latitude, self.Profile.c.longitude,
-            self.Profile.c.phone, self.Profile.c.fax]
+            self.Profile.c.phone, self.Profile.c.fax, self.Profile.c.profile]
 
         joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.user_id)
         joined_query = joined_query.join(self.Prefecture, self.Profile.c.prefecture_id == self.Prefecture.c.id_)

@@ -1,34 +1,34 @@
-<form id="form-account" class="form-horizontal" action="/api/account" method="POST">
+<form id="formAccount" class="form-horizontal" action="/api/account" method="POST">
     <fieldset>
       <div class="form-group">
-        <label for="name" class="col col-xs-12 col-sm-4 col-md-3 control-label">お名前<span class="settings-must">*</span></label>
+        <label class="col col-xs-12 col-sm-4 col-md-3 control-label">お名前<span class="settings-must">*</span></label>
         <div class="col col-xs-5 col-sm-3 col-md-3">
-          <input type="text" name="name1" id="name1" class="form-control" placeholder="姓">
+          <input type="text" name="lastName" id="lastName" class="form-control" placeholder="姓">
         </div>
         <div class="col col-xs-5 col-sm-3 col-md-3">
-          <input type="text" name="name2" id="name2" class="form-control" placeholder="名">
-        </div>
-        <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-3"></div>
-      </div>
-      <div class="form-group">
-        <label for="kana" class="col-xs-12 col col-sm-4 col-md-3 control-label">ふりがな<span class="settings-must">*</span></label>
-        <div class="col col-xs-5 col-sm-3 col-md-3">
-          <input type="text" name="kana1" id="kana1" class="form-control" placeholder="せい">
-        </div>
-        <div class="col col-xs-5 col-sm-3 col-md-3">
-          <input type="text" name="kana2" id="kana2" class="form-control" placeholder="めい">
+          <input type="text" name="firstName" id="firstName" class="form-control" placeholder="名">
         </div>
         <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-3"></div>
       </div>
       <div class="form-group">
-        <label for="nickname" class="col col-xs-12 col-sm-4 col-md-3 control-label">ニックネーム</label>
+        <label class="col-xs-12 col col-sm-4 col-md-3 control-label">ふりがな<span class="settings-must">*</span></label>
+        <div class="col col-xs-5 col-sm-3 col-md-3">
+          <input type="text" name="lastKanaName" id="lastKanaName" class="form-control" placeholder="せい">
+        </div>
+        <div class="col col-xs-5 col-sm-3 col-md-3">
+          <input type="text" name="firstKanaName" id="firstKanaName" class="form-control" placeholder="めい">
+        </div>
+        <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-3"></div>
+      </div>
+      <div class="form-group">
+        <label class="col col-xs-12 col-sm-4 col-md-3 control-label">ニックネーム</label>
         <div class="col col-xs-10 col-sm-6 col-md-6">
-          <input type="text" name="nickname" id="nickname" class="form-control">
+          <input type="text" name="nickName" id="nickName" class="form-control">
         </div>
         <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-3"></div>
       </div>
       <div class="form-group">
-        <label for="email" class="col col-xs-12 col-sm-4 col-md-3 control-label">メールアドレス<span class="settings-must">*</span></label>
+        <label class="col col-xs-12 col-sm-4 col-md-3 control-label">メールアドレス<span class="settings-must">*</span></label>
         <div class="col col-xs-12 col-sm-6 col-md-7">
           <input type="email" name="email" id="email" class="form-control" placeholder="メールアドレスを入力してください">
         </div>
@@ -52,9 +52,9 @@
         <div class="col-xs-offset-5 col-sm-offset-4 col-md-offset-5"></div>
       </div>-->
       <div class="form-group">
-        <label for="pref" class="col col-xs-12 col-sm-4 col-md-3 control-label">住所</label>
+        <label class="col col-xs-12 col-sm-4 col-md-3 control-label">住所</label>
         <div class="col col-xs-7 col-sm-4 col-md-3">
-          <select name="pref" id="pref" class="form-control">
+          <select name="prefecture" id="prefecture" class="form-control">
             <option value="北海道">北海道</option>
             <option value="青森県">青森県</option>
             <option value="岩手県">岩手県</option>
@@ -108,14 +108,14 @@
       </div>
       <div class="form-group">
         <div class="col col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3">
-          <input type="text" name="addr1" id="addr1" class="form-control" placeholder="市区町村名">
+          <input type="text" name="address" id="address" class="form-control" placeholder="市区町村名">
           <p class="help-block">住所は2つに分けて記入してください。</p>
-          <input type="text" name="addr2" id="addr2" class="form-control" placeholder="番地・ビル名">
+          <input type="text" name="streetAddress" id="streetAddress" class="form-control" placeholder="番地・ビル名">
           <p class="help-block">残りの住所を記入してください。</p>
         </div>
       </div>
-      <div class="form-group">
-        <label for="name" class="col col-xs-12 col-sm-4 col-md-3 control-label">座標（緯度経度）</label>
+      <!--<div class="form-group">
+        <label class="col col-xs-12 col-sm-4 col-md-3 control-label">座標（緯度経度）</label>
         <div class="col col-xs-5 col-sm-3 col-md-3">
           <input type="number" name="longitude" id="longitude" class="form-control" placeholder="緯度">
         </div>
@@ -123,36 +123,79 @@
           <input type="number" name="latitude" id="latitude" class="form-control" placeholder="軽度">
         </div>
         <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-3"></div>
-      </div>
+      </div>-->
       <div class="form-group">
-        <label for="tel" class="col col-xs-12 col-sm-4 col-md-3 control-label">電話番号</label>
+        <label class="col col-xs-12 col-sm-4 col-md-3 control-label">電話番号</label>
         <div class="col-xs-12 colcol-xs-10 col-sm-6 col-md-7">
           <div class="input-group">
-            <input type="tel" name="tel1" id="tel1" class="form-control" placeholder="080">
-            <span class="input-group-addon">-</span>
-            <input type="tel" name="tel2" id="tel2" class="form-control" placeholder="0000">
-            <span class="input-group-addon">-</span>
-            <input type="tel" name="tel3" id="tel3" class="form-control" placeholder="0000">
+            <input type="tel" name="phoneNumber" id="phoneNumber" class="form-control" placeholder="080-1234-5678">
           </div>
         </div>
         <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-2"></div>
       </div>
       <div class="form-group">
-        <label for="tel" class="col col-xs-12 col-sm-4 col-md-3 control-label">FAX</label>
+        <label class="col col-xs-12 col-sm-4 col-md-3 control-label">FAX</label>
         <div class="col-xs-12 colcol-xs-10 col-sm-6 col-md-7">
           <div class="input-group">
-            <input type="tel" name="fax1" id="fax1" class="form-control" placeholder="042">
-            <span class="input-group-addon">-</span>
-            <input type="tel" name="fax2" id="fax2" class="form-control" placeholder="0000">
-            <span class="input-group-addon">-</span>
-            <input type="tel" name="fax3" id="fax3" class="form-control" placeholder="0000">
+            <input type="tel" name="faxNumber" id="faxNumber" class="form-control" placeholder="080-1234-5678">
           </div>
+        </div>
+        <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-2"></div>
+      </div>
+      <div class="form-group">
+        <label class="col col-xs-12 col-sm-4 col-md-3 control-label">自己紹介</label>
+        <div class="col-xs-10 col-sm-6 col-md-7">
+          <textarea name="profile" id="profile" class="form-control" rows="10"></textarea>
+        </div>
+        <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-2"></div>
+      </div>
+      <div class="form-group">
+        <label class="col col-xs-12 col-sm-4 col-md-3 control-label">できること</label>
+        <div class="col-xs-10 col-sm-6 col-md-7">
+          <div class="input-group">
+            <span class="input-group-btn">
+              <button id="buttonAddAbility" class="btn btn-default" type="button">追加する</button>
+            </span>
+            <input type="text" name="newAbility" id="newAbility" class="form-control">
+          </div>
+        </div>
+        <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-2"></div>
+      </div>
+      <div class="form-group">
+        <label class="col col-xs-12 col-sm-4 col-md-3 control-label"></label>
+        <div class="col-xs-10 col-sm-6 col-md-7">
+          <ul class="list-group">
+            <li id="abilityItem5" class="list-group-item">aa</li>
+            <li id="abilityItem11" class="list-group-item">bbb</li>
+          </ul>
+        </div>
+        <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-2"></div>
+      </div>
+      <div class="form-group">
+        <label class="col col-xs-12 col-sm-4 col-md-3 control-label">してほしいこと</label>
+        <div class="col-xs-10 col-sm-6 col-md-7">
+          <div class="input-group">
+            <span class="input-group-btn">
+              <button id="buttonAddRequest" class="btn btn-default" type="button">追加する</button>
+            </span>
+            <input type="text" name="newRequest" id="newRequest" class="form-control">
+          </div>
+        </div>
+        <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-2"></div>
+      </div>
+      <div class="form-group">
+        <label class="col col-xs-12 col-sm-4 col-md-3 control-label"></label>
+        <div class="col-xs-10 col-sm-6 col-md-7">
+          <ul class="list-group">
+            <li id="requestItem2" class="list-group-item">aaa</li>
+            <li id="requestItem4" class="list-group-item">bbb</li>
+          </ul>
         </div>
         <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-2"></div>
       </div>
       <div class="form-group">
         <div class="col col-xs-9 col-xs-offset-3 col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3">
-          <button id="button-update-account" type="button" class="btn btn-success btn-lg">　更　新　</button>
+          <button id="buttonUpdateAccount" type="button" class="btn btn-success btn-lg">　更　新　</button>
         </div>
       </div>
     </fieldset>
