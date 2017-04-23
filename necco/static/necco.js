@@ -48,18 +48,9 @@ $(function() {
       url: "/api/account",
       dataType: "json"
     }).done(function(data, text, jqxhr){
-      $("#lastName").val(data["Profile.name_"].split(" ")[0]);
-      $("#firstName").val(data["Profile.name_"].split(" ")[1]);
-      $("#lastKanaName").val(data["Profile.kana"].split(" ")[0]);
-      $("#firstKanaName").val(data["Profile.kana"].split(" ")[1]);
-      $("#nickName").val(data["Profile.nickname"]);
-      $("#email").val(data["User.email"]);
-      $("#prefecture").val(data["Prefecture.name_"]);
-      $("#address").val(data["Profile.city"]);
-      $("#streetAddress").val(data["Profile.city"]);
-      $("#phoneNumber").val(data["Profile.phone"]);
-      $("#faxNumber").val(data["Profile.fax"]);
-      $("#profile").val(data["Profile.profile"]);
+      for(var key in data){
+        $("#" + key).val(data[key]);
+      }
     }).fail(function(jqxhr, text, error){
     });
 
