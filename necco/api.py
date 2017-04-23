@@ -85,13 +85,19 @@ class AccountApi(MethodView):
     """ for route of "/api/account" """
 
     def get(self):
+        """ Get user account information who logs in currently. """
+
         email = session["username"]
         user_info = _db.get_user_account(email)
         return json.dumps(user_info)
 
-    def post():
+    def post(self):
+        """ Create new user account. """
+
         got = {key: item for key, item in request.form.items()}
         return json.dumps(got)
 
-    def put():
+    def put(self):
+        """ Update information for the current user account. """
+
         return "Not implemented yet"
