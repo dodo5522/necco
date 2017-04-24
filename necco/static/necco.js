@@ -5,9 +5,17 @@ var activateNavbarItem = function(elementId) {
   targetItem.addClass("active");
 };
 
+var hideContent = function() {
+  $(".necco-content").css("display", "none");
+  $(".overlay").css("display", "");
+  $(".loading").css("display", "");
+};
+
 var showContent = function(idContent) {
   $(".necco-content").css("display", "none");
-  $(idContent).css("display", "");
+  $(".overlay").fadeOut();
+  $(".loading").fadeOut();
+  $(idContent).fadeIn();
 };
 
 var prepareContent = function(type_) {
@@ -36,11 +44,13 @@ var sortRecordsByKana = function(records) {
 
 $(function() {
   $("#navbarItemPassbook").on("click", function() {
+    hideContent();
     activateNavbarItem("#navbarItemPassbook");
     showContent("#contentPassbook");
   });
 
   $("#navbarItemSettings").on("click", function() {
+    hideContent();
     activateNavbarItem("#navbarItemSettings");
 
     $.ajax({
@@ -51,14 +61,14 @@ $(function() {
       for(var key in data){
         $("#" + key).val(data[key]);
       }
+      showContent("#contentSettings");
     }).fail(function(jqxhr, text, error){
+      showContent("#contentSettings");
     });
-
-    showContent("#contentSettings");
   });
 
-  $("#button-update-account").on("click", function() {
-    var sending_data = $("#form-account").serializeArray();
+  $("#buttonUpdateAccount").on("click", function() {
+    var sending_data = $("#formAccount").serializeArray();
     //var ret = $.ajax({
     //  type: "POST",
     //  url: "/api/account",
@@ -68,6 +78,8 @@ $(function() {
   });
 
   $("#navbarItemAbilities").on("click", function() {
+    hideContent();
+
     var type_ = "Abilities";
     var table = prepareContent(type_);
 
@@ -96,11 +108,16 @@ $(function() {
           $("<td>").text(record[columns[i]]).appendTo(tr);
         }
       }
+
+      showContent("#contentAbilities");
     }).fail(function(jqxhr, text, error){
+      showContent("#contentAbilities");
     });
   });
 
   $("#navbarItemRequests").on("click", function() {
+    hideContent();
+
     var type_ = "Requests";
     var table = prepareContent(type_);
 
@@ -129,9 +146,16 @@ $(function() {
           $("<td>").text(record[columns[i]]).appendTo(tr);
         }
       }
+
+      showContent("#id-necco-content-requests");
     }).fail(function(jqxhr, text, error){
+      showContent("#id-necco-content-requests");
     });
   });
+});
 
+$(window).on("load", function() {
+  hideContent();
   $("#navbarItemPassbook").addClass("active");
+  showContent("#contentPassbook");
 });
