@@ -95,7 +95,7 @@ $(function() {
 
     $.ajax({
       type: "GET",
-      url: "/api/" + type_,
+      url: "/api/" + type_.toLowerCase(),
       dataType: "json"
     }).done(function(data, text, jqxhr){
       var length = data.length;
@@ -133,7 +133,7 @@ $(function() {
 
     $.ajax({
       type: "GET",
-      url: "/api/" + type_,
+      url: "/api/" + type_.toLowerCase(),
       dataType: "json"
     }).done(function(data, text, jqxhr){
       var length = data.length;
