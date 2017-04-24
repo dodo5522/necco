@@ -81,7 +81,11 @@ function create_db() {
                 COLUMNS=$(echo ${VALUES} | sed -e 's/^#//')
                 continue
             fi
-            ${DB_COMMAND} "INSERT INTO ${TABLE}(${COLUMNS}) VALUES (${VALUES})"
+            if [ ${IS_TEST} -eq 0 ]; then
+                ${DB_COMMAND} "INSERT INTO ${TABLE} VALUES (${VALUES})"
+            else
+                ${DB_COMMAND} "INSERT INTO ${TABLE}(${COLUMNS}) VALUES (${VALUES})"
+            fi
         done
     done
 }

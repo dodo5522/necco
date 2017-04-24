@@ -27,3 +27,7 @@ img {
   color: red;
   font-size: smaller;
 }
+
+.align-right {
+  float: right;
+}

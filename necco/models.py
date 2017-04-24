@@ -56,16 +56,16 @@ class Database(object):
     def yield_requests(self):
         """ Generator function which returns request records with below query.
 
-            SELECT Profile.name_, Profile.kana, Request.detail FROM User
-                INNER JOIN Profile ON User.id = Profile.user_id
-                INNER JOIN UsersRequest ON User.id_ = UsersRequest.user_id
-                INNER JOIN Request ON UsersRequest.request_id = Request.id_;
+            SELECT Profile.lastName, Profile.firstName, Profile.lastKanaName, Profile.firstKanaName, Request.detail FROM User
+                INNER JOIN Profile ON User.id = Profile.userId
+                INNER JOIN UsersRequest ON User.id_ = UsersRequest.userId
+                INNER JOIN Request ON UsersRequest.requestId = Request.id_;
         """
         columns = [self.Profile.c.name_, self.Profile.c.kana, self.Request.c.detail]
 
-        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.user_id)
-        joined_query = joined_query.join(self.UsersRequest, self.User.c.id_ == self.UsersRequest.c.user_id)
-        joined_query = joined_query.join(self.Request, self.UsersRequest.c.request_id == self.Request.c.id_)
+        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.userId)
+        joined_query = joined_query.join(self.UsersRequest, self.User.c.id_ == self.UsersRequest.c.userId)
+        joined_query = joined_query.join(self.Request, self.UsersRequest.c.requestId == self.Request.c.id_)
         joined_query = joined_query.select()
 
         for record in joined_query.with_only_columns(columns).execute():
@@ -75,15 +75,15 @@ class Database(object):
         """ Generator function which returns ability records with below query.
 
             SELECT Profile.name_, Profile.kana, Ability.detail FROM User
-                INNER JOIN Profile ON Profile.user_id = User.id_
-                INNER JOIN UsersAbility ON User.id_ = UsersAbility.user_id
-                INNER JOIN Ability ON UsersAbility.ability_id = Ability.id_;
+                INNER JOIN Profile ON Profile.userId = User.id_
+                INNER JOIN UsersAbility ON User.id_ = UsersAbility.userId
+                INNER JOIN Ability ON UsersAbility.abilityId = Ability.id_;
         """
         columns = [self.Profile.c.name_, self.Profile.c.kana, self.Ability.c.detail]
 
-        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.user_id)
-        joined_query = joined_query.join(self.UsersAbility, self.User.c.id_ == self.UsersAbility.c.user_id)
-        joined_query = joined_query.join(self.Ability, self.UsersAbility.c.ability_id == self.Ability.c.id_)
+        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.userId)
+        joined_query = joined_query.join(self.UsersAbility, self.User.c.id_ == self.UsersAbility.c.userId)
+        joined_query = joined_query.join(self.Ability, self.UsersAbility.c.abilityId == self.Ability.c.id_)
         joined_query = joined_query.select()
 
         for record in joined_query.with_only_columns(columns).execute():
@@ -116,19 +116,30 @@ class Database(object):
         """ Getter function returns the specified user infomation.
 
             SELECT Profile.name_, Profile.kana, Profile.nickname, User.email, User.password_,
-                   Prefecture.name_, Profile.city, Profile.latitude, Profile.longitude, Profile.phone, Profile.fax
-                   from Profile inner join User on Profile.user_id = User.id_ inner join Prefecture on Profile.prefecture_id = Prefecture.id_;
+                   Prefecture.name_, Profile.address, Profile.latitude, Profile.longitude, Profile.phone, Profile.fax
+                   from Profile inner join User on Profile.userId = User.id_ inner join Prefecture on Profile.prefectureId = Prefecture.id_;
         """
-        columns = [
-            self.Profile.c.name_, self.Profile.c.kana, self.Profile.c.nickname,
-            self.User.c.email, self.User.c.password_, self.Prefecture.c.name_,
-            self.Profile.c.city, self.Profile.c.latitude, self.Profile.c.longitude,
-            self.Profile.c.phone, self.Profile.c.fax]
 
-        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.user_id)
-        joined_query = joined_query.join(self.Prefecture, self.Profile.c.prefecture_id == self.Prefecture.c.id_)
-        joined_query = joined_query.select(self.User.c.email == email).with_only_columns(columns)
+        columns = [
+            # db, html
+            (self.Profile.c.lastName, "lastName"),
+            (self.Profile.c.firstName, "firstName"),
+            (self.Profile.c.lastKanaName, "lastKanaName"),
+            (self.Profile.c.firstKanaName, "firstKanaName"),
+            (self.Profile.c.nickName, "nickName"),
+            (self.User.c.email, "email"),
+            (self.Prefecture.c.name_, "prefecture"),
+            (self.Profile.c.address, "address"),
+            (self.Profile.c.streetAddress, "streetAddress"),
+            (self.Profile.c.phoneNumber, "phoneNumber"),
+            (self.Profile.c.faxNumber, "faxNumber"),
+            (self.Profile.c.profile, "profile"),
+        ]
+
+        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.userId)
+        joined_query = joined_query.join(self.Prefecture, self.Profile.c.prefectureId == self.Prefecture.c.id_)
+        joined_query = joined_query.select(self.User.c.email == email).with_only_columns((c[0] for c in columns))
 
         record = joined_query.execute().fetchone()
 
-        return {str(key): str(value) for key, value in zip(columns, record)}
+        return {str(key): str(value) for key, value in zip((c[1] for c in columns), record)}
