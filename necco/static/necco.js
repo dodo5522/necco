@@ -107,9 +107,9 @@ $(function() {
         }
       }
 
-      showContent("#contentAbilities");
+      showContent("#content" + type_);
     }).fail(function(jqxhr, text, error){
-      showContent("#contentAbilities");
+      showContent("#content" + type_);
     });
   });
 
@@ -143,9 +143,9 @@ $(function() {
         }
       }
 
-      showContent("#id-necco-content-requests");
+      showContent("#content" + type_);
     }).fail(function(jqxhr, text, error){
-      showContent("#id-necco-content-requests");
+      showContent("#content" + type_);
     });
   });
 });
