@@ -69,12 +69,16 @@ $(function() {
 
   $("#buttonUpdateAccount").on("click", function() {
     var sending_data = $("#formAccount").serializeArray();
-    //var ret = $.ajax({
-    //  type: "POST",
-    //  url: "/api/account",
-    //  dataType: "json",
-    //  data: "",
-    //});
+    $.ajax({
+      type: "POST",
+      url: "/api/account",
+      dataType: "json",
+      data: JSON.stringify(sending_data)
+    }).done(function(data, text, jqxhr){
+      $("#contentSettings").trigger("click");
+    }).fail(function(jqxhr, text, error){
+      alert("失敗しました的なメッセージを表示しよう");
+    });
   });
 
   $("#navbarItemAbilities").on("click", function() {
