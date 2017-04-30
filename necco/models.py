@@ -17,9 +17,10 @@
 
 from necco import config
 from sqlalchemy import create_engine, MetaData
+from sqlalchemy.sql import func
 
 
-class Database(object):
+class DbBase(object):
     __instance = None
 
     def __new__(
@@ -50,47 +51,45 @@ class Database(object):
 
         return cls.__instance
 
+
+class BaseModel(object):
+    def __init__(self, db=None):
+        self._db = db if db else DbBase()
+
+    def get_columns(self):
+        raise NotImplementedError
+
+    def yield_record(self):
+        raise NotImplementedError
+
+
+class AccountModel(BaseModel):
     def __init__(self, *args, **kwargs):
-        pass
+        super().__init__()
+        self.account_columns = [
+            # db, html
+            (self._db.Profile.c.lastName, "lastName"),
+            (self._db.Profile.c.firstName, "firstName"),
+            (self._db.Profile.c.lastKanaName, "lastKanaName"),
+            (self._db.Profile.c.firstKanaName, "firstKanaName"),
+            (self._db.Profile.c.nickName, "nickName"),
+            (self._db.User.c.email, "email"),
+            (self._db.Prefecture.c.name_, "prefecture"),
+            (self._db.Profile.c.address, "address"),
+            (self._db.Profile.c.streetAddress, "streetAddress"),
+            (self._db.Profile.c.phoneNumber, "phoneNumber"),
+            (self._db.Profile.c.faxNumber, "faxNumber"),
+            (self._db.Profile.c.profile, "profile"),
+        ]
 
-    def yield_requests(self):
-        """ Generator function which returns request records with below query.
+    def get_columns(self):
+        return [c[1] for c in self.account_columns]
 
-            SELECT Profile.lastName, Profile.firstName, Profile.lastKanaName, Profile.firstKanaName, Request.detail FROM User
-                INNER JOIN Profile ON User.id = Profile.userId
-                INNER JOIN UsersRequest ON User.id_ = UsersRequest.userId
-                INNER JOIN Request ON UsersRequest.requestId = Request.id_;
-        """
-        columns = [self.Profile.c.name_, self.Profile.c.kana, self.Request.c.detail]
-
-        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.userId)
-        joined_query = joined_query.join(self.UsersRequest, self.User.c.id_ == self.UsersRequest.c.userId)
-        joined_query = joined_query.join(self.Request, self.UsersRequest.c.requestId == self.Request.c.id_)
-        joined_query = joined_query.select()
-
-        for record in joined_query.with_only_columns(columns).execute():
-            yield record
-
-    def yield_abilities(self):
-        """ Generator function which returns ability records with below query.
-
-            SELECT Profile.name_, Profile.kana, Ability.detail FROM User
-                INNER JOIN Profile ON Profile.userId = User.id_
-                INNER JOIN UsersAbility ON User.id_ = UsersAbility.userId
-                INNER JOIN Ability ON UsersAbility.abilityId = Ability.id_;
-        """
-        columns = [self.Profile.c.name_, self.Profile.c.kana, self.Ability.c.detail]
-
-        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.userId)
-        joined_query = joined_query.join(self.UsersAbility, self.User.c.id_ == self.UsersAbility.c.userId)
-        joined_query = joined_query.join(self.Ability, self.UsersAbility.c.abilityId == self.Ability.c.id_)
-        joined_query = joined_query.select()
-
-        for record in joined_query.with_only_columns(columns).execute():
-            yield record
+    def yield_record(self):
+        yield None
 
     def get_hashed_password(self, email):
-        proxy = self.User.select(self.User.c.email == email).execute()
+        proxy = self._db.User.select(self._db.User.c.email == email).execute()
 
         if not proxy.rowcount:
             raise ValueError("Account not found.")
@@ -100,46 +99,130 @@ class Database(object):
 
         return password
 
-    def yield_prefectures(self):
+    def get_user_account(self, email):
+        """ Getter function returns the specified user infomation.
+
+            SELECT Profile.name_, Profile.kana, Profile.nickname, ... from Profile
+                   inner join User on Profile.userId = User.id_
+                   inner join Prefecture on Profile.prefectureId = Prefecture.id_;
+        """
+
+        joined_query = self._db.User.join(
+            self._db.Profile, self._db.User.c.id_ == self._db.Profile.c.userId)
+        joined_query = joined_query.join(
+            self._db.Prefecture, self._db.Profile.c.prefectureId == self._db.Prefecture.c.id_)
+        joined_query = joined_query.select(
+            self._db.User.c.email == email).with_only_columns([c[0] for c in self.account_columns])
+
+        record = joined_query.execute().fetchone()
+
+        return {str(key): str(value) for key, value in zip((c[1] for c in self.account_columns), record)}
+
+
+class AbilityModel(BaseModel):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.ability_columns = [
+            (self._db.Profile.c.lastName, "lastName"),
+            (self._db.Profile.c.firstName, "firstName"),
+            (self._db.Profile.c.lastKanaName, "lastKanaName"),
+            (self._db.Profile.c.firstKanaName, "firstKanaName"),
+            (self._db.Ability.c.detail, "detail"),
+        ]
+
+    def get_columns(self):
+        return [c[1] for c in self.ability_columns]
+
+    def yield_record(self):
+        """ Generator function which returns ability records with below query.
+
+            SELECT Profile.lastName, Profile.firstName, ... FROM User
+                INNER JOIN Profile ON Profile.userId = User.id_
+                INNER JOIN UsersAbility ON User.id_ = UsersAbility.userId
+                INNER JOIN Ability ON UsersAbility.abilityId = Ability.id_;
+        """
+
+        joined_query = self._db.User.join(self._db.Profile, self._db.User.c.id_ == self._db.Profile.c.userId)
+        joined_query = joined_query.join(self._db.UsersAbility, self._db.User.c.id_ == self._db.UsersAbility.c.userId)
+        joined_query = joined_query.join(self._db.Ability, self._db.UsersAbility.c.abilityId == self._db.Ability.c.id_)
+        joined_query = joined_query.select()
+        joined_query = joined_query.with_only_columns([c[0] for c in self.ability_columns]).execute()
+
+        while True:
+            record = joined_query.fetchone()
+            if not record:
+                break
+            yield record
+
+
+class RequestModel(BaseModel):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.request_columns = [
+            (self._db.Profile.c.lastName, "lastName"),
+            (self._db.Profile.c.firstName, "firstName"),
+            (self._db.Profile.c.lastKanaName, "lastKanaName"),
+            (self._db.Profile.c.firstKanaName, "firstKanaName"),
+            (self._db.Request.c.detail, "detail"),
+        ]
+
+    def _get_request_count(self):
+        """ Get the number of requests.
+
+            SELECT COUNT(*) FROM Request
+                INNER JOIN UsersRequest ON UsersRequest.requestId = Request.id_;
+        """
+
+        joined_query = self._db.Request.join(
+            self._db.UsersRequest, self._db.UsersRequest.c.requestId == self._db.Request.c.id_)
+        joined_query = joined_query.select().with_only_columns([func.count()])
+        res = joined_query.execute()
+        return [_ for _ in res][0][0]
+
+    def get_columns(self):
+        return [c[1] for c in self.request_columns]
+
+    def yield_record(self):
+        """ Generator function which returns request records with below query.
+
+            SELECT Profile.lastName, Profile.firstName, Profile.lastKanaName, Profile.firstKanaName, Request.detail FROM User
+                INNER JOIN Profile ON User.id = Profile.userId
+                INNER JOIN UsersRequest ON User.id_ = UsersRequest.userId
+                INNER JOIN Request ON UsersRequest.requestId = Request.id_;
+        """
+
+        joined_query = self._db.User.join(
+            self._db.Profile, self._db.User.c.id_ == self._db.Profile.c.userId)
+        joined_query = joined_query.join(
+            self._db.UsersRequest, self._db.User.c.id_ == self._db.UsersRequest.c.userId)
+        joined_query = joined_query.join(
+            self._db.Request, self._db.UsersRequest.c.requestId == self._db.Request.c.id_)
+        joined_query = joined_query.select()
+        joined_query = joined_query.with_only_columns([c[0] for c in self.request_columns]).execute()
+
+        while True:
+            record = joined_query.fetchone()
+            if not record:
+                break
+            yield record
+
+
+class PrefectureModel(BaseModel):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+    def get_columns(self):
+        return [
+            self._db.Prefecture.c.id_,
+            self._db.Prefecture.c.name_
+        ]
+
+    def yield_record(self):
         """ Generator function which returns prefectures with below query.
 
             SELECT Prefecture.id_, Prefecture.name_ FROM Prefecture;
         """
-        columns = [self.Prefecture.c.id_, self.Prefecture.c.name_]
-
-        query = self.Prefecture.select().with_only_columns(columns)
+        query = self._db.Prefecture.select().with_only_columns(self.get_columns())
 
         for record in query.execute():
             yield record
-
-    def get_user_account(self, email):
-        """ Getter function returns the specified user infomation.
-
-            SELECT Profile.name_, Profile.kana, Profile.nickname, User.email, User.password_,
-                   Prefecture.name_, Profile.address, Profile.latitude, Profile.longitude, Profile.phone, Profile.fax
-                   from Profile inner join User on Profile.userId = User.id_ inner join Prefecture on Profile.prefectureId = Prefecture.id_;
-        """
-
-        columns = [
-            # db, html
-            (self.Profile.c.lastName, "lastName"),
-            (self.Profile.c.firstName, "firstName"),
-            (self.Profile.c.lastKanaName, "lastKanaName"),
-            (self.Profile.c.firstKanaName, "firstKanaName"),
-            (self.Profile.c.nickName, "nickName"),
-            (self.User.c.email, "email"),
-            (self.Prefecture.c.name_, "prefecture"),
-            (self.Profile.c.address, "address"),
-            (self.Profile.c.streetAddress, "streetAddress"),
-            (self.Profile.c.phoneNumber, "phoneNumber"),
-            (self.Profile.c.faxNumber, "faxNumber"),
-            (self.Profile.c.profile, "profile"),
-        ]
-
-        joined_query = self.User.join(self.Profile, self.User.c.id_ == self.Profile.c.userId)
-        joined_query = joined_query.join(self.Prefecture, self.Profile.c.prefectureId == self.Prefecture.c.id_)
-        joined_query = joined_query.select(self.User.c.email == email).with_only_columns((c[0] for c in columns))
-
-        record = joined_query.execute().fetchone()
-
-        return {str(key): str(value) for key, value in zip((c[1] for c in columns), record)}
