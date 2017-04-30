@@ -18,27 +18,26 @@
 import json
 from flask import session, request
 from flask.views import MethodView
-from necco.models import Database
-
-
-_db = Database()
+from necco.models import AccountModel, AbilityModel, RequestModel, PrefectureModel
 
 
 class AbilityApi(MethodView):
     """ for route of /api/abilities """
 
+    def __init__(self, *args, **kwargs):
+        super(AbilityApi, self).__init__(*args, **kwargs)
+        self.model = AbilityModel()
+
     def get(self):
-        args = request.args
-
-        if args:
-            columns = args
-        else:
-            columns = ["name", "kana", "detail"]
-
-        abilities = [{columns[i]: r[i] for i in range(len(columns))} for r in _db.yield_abilities()]
+        try:
+            columns = request.args if request.args else self.model.get_columns()
+            abilities = [{columns[i]: r[i] for i in range(len(columns))} for r in self.model.yield_record()]
+        except:
+            columns = abilities = []
 
         sending_obj = {
             "length": len(abilities),
+            "columns": columns,
             "body": abilities
         }
 
@@ -51,12 +50,20 @@ class AbilityApi(MethodView):
 class RequestApi(MethodView):
     """ for route of /api/requests """
 
+    def __init__(self, *args, **kwargs):
+        super(RequestApi, self).__init__(*args, **kwargs)
+        self.model = RequestModel()
+
     def get(self):
-        columns = ["name", "kana", "detail"]
-        requests = [{columns[i]: r[i] for i in range(len(columns))} for r in _db.yield_requests()]
+        try:
+            columns = request.args if request.args else self.model.get_columns()
+            requests = [{columns[i]: r[i] for i in range(len(columns))} for r in self.model.yield_record()]
+        except:
+            columns = requests = []
 
         sending_obj = {
             "length": len(requests),
+            "columns": columns,
             "body": requests
         }
 
@@ -69,9 +76,13 @@ class RequestApi(MethodView):
 class PrefectureApi(MethodView):
     """ for route of /api/prefs """
 
+    def __init__(self, *args, **kwargs):
+        super(PrefectureApi, self).__init__(*args, **kwargs)
+        self.model = PrefectureModel()
+
     def get(self):
         columns = ["id", "name"]
-        prefs = [{columns[i]: r[i] for i in range(len(columns))} for r in _db.yield_prefectures()]
+        prefs = [{columns[i]: r[i] for i in range(len(columns))} for r in self.model.yield_record()]
 
         sending_obj = {
             "length": len(prefs),
@@ -84,11 +95,15 @@ class PrefectureApi(MethodView):
 class AccountApi(MethodView):
     """ for route of "/api/account" """
 
+    def __init__(self, *args, **kwargs):
+        super(AccountApi, self).__init__(*args, **kwargs)
+        self.model = AccountModel()
+
     def get(self):
         """ Get user account information who logs in currently. """
 
         email = session["username"]
-        user_info = _db.get_user_account(email)
+        user_info = self.model.get_user_account(email)
         return json.dumps(user_info)
 
     def post(self):
