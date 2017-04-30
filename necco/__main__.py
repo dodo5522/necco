@@ -50,7 +50,6 @@ def configure_necco_app():
     app.add_url_rule(rule="/api/requests", view_func=RequestApi.as_view("requests"))
     app.add_url_rule(rule="/api/prefs", view_func=PrefectureApi.as_view("prefs"))
     app.add_url_rule(rule="/api/account", view_func=AccountApi.as_view("account"))
-    app.add_url_rule(rule="/temp", view_func=DebugView.as_view("temp"))
 
     return app
 
@@ -59,6 +58,21 @@ app = configure_necco_app()
 
 
 if __name__ == "__main__":
-    app.debug = True
+    def after_request(r):
+        """
+        Add headers to both force latest IE rendering engine or Chrome Frame,
+        and also to cache the rendered page for 10 minutes.
+        """
+        r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        r.headers["Pragma"] = "no-cache"
+        r.headers["Expires"] = "0"
+        r.headers['Cache-Control'] = 'public, max-age=0'
+        return r
+
+    app.after_request(after_request)
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+
+    app.debug = True
+    app.add_url_rule(rule="/temp", view_func=DebugView.as_view("temp"))
+
     app.run(host="0.0.0.0", port=5000)
