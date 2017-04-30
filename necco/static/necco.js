@@ -36,7 +36,7 @@ var prepareContent = function(type_) {
 var sortRecordsByKana = function(records) {
   return records.sort(
     function(first, second) {
-      if(first.kana > second.kana) { return 1; }
+      if(first.lastKanaName > second.lastKanaName) { return 1; }
       else if(first.kana < second.kana) { return -1; }
       else { return 0; }
     })
