@@ -83,24 +83,22 @@ $(function() {
     var type_ = "Abilities";
     var table = prepareContent(type_);
 
-    // TODO: columnsもGETするように
-    columns = new Array("name", "kana", "detail");
-    columns_j = new Array("名前", "よみ", "できること");
-
-    var head = $("<thead>").appendTo(table);
-    var tr = $("<tr>").appendTo(head);
-    for(var i = 0; i <= columns_j.length; i++) {
-      $("<th>").text(columns_j[i]).appendTo(tr)
-    }
-
     $.ajax({
       type: "GET",
       url: "/api/" + type_.toLowerCase(),
       dataType: "json"
     }).done(function(data, text, jqxhr){
       var length = data.length;
+      var columns = data.columns
       var records = sortRecordsByKana(data.body);
+
       var body = $("<tbody>").appendTo(table);
+      var head = $("<thead>").appendTo(table);
+      var tr = $("<tr>").appendTo(head);
+
+      for(var i = 0; i <= columns.length; i++) {
+        $("<th>").text(columns[i]).appendTo(tr)
+      }
 
       for(var record of records) {
         var tr = $("<tr>").appendTo(body);
@@ -109,9 +107,9 @@ $(function() {
         }
       }
 
-      showContent("#contentAbilities");
+      showContent("#content" + type_);
     }).fail(function(jqxhr, text, error){
-      showContent("#contentAbilities");
+      showContent("#content" + type_);
     });
   });
 
@@ -121,24 +119,22 @@ $(function() {
     var type_ = "Requests";
     var table = prepareContent(type_);
 
-    // TODO: columnsもGETするように
-    columns = new Array("name", "kana", "detail");
-    columns_j = new Array("名前", "よみ", "してほしいこと");
-
-    var head = $("<thead>").appendTo(table);
-    var tr = $("<tr>").appendTo(head);
-    for(var i = 0; i <= columns_j.length; i++) {
-      $("<th>").text(columns_j[i]).appendTo(tr)
-    }
-
     $.ajax({
       type: "GET",
       url: "/api/" + type_.toLowerCase(),
       dataType: "json"
     }).done(function(data, text, jqxhr){
       var length = data.length;
+      var columns = data.columns
       var records = sortRecordsByKana(data.body);
+
       var body = $("<tbody>").appendTo(table);
+      var head = $("<thead>").appendTo(table);
+      var tr = $("<tr>").appendTo(head);
+
+      for(var i = 0; i <= columns.length; i++) {
+        $("<th>").text(columns[i]).appendTo(tr)
+      }
 
       for(var record of records) {
         var tr = $("<tr>").appendTo(body);
@@ -147,9 +143,9 @@ $(function() {
         }
       }
 
-      showContent("#id-necco-content-requests");
+      showContent("#content" + type_);
     }).fail(function(jqxhr, text, error){
-      showContent("#id-necco-content-requests");
+      showContent("#content" + type_);
     });
   });
 });
