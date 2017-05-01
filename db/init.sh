@@ -65,6 +65,11 @@ function create_db() {
             sed -e 's/ UNSIGNED / /g' | \
             sed -e 's/ AUTO_INCREMENT */ AUTOINCREMENT /g' \
             > ${SCHEME_FOR_TEST}
+
+        if [ -e "${DB_FOR_TEST}" ]; then
+            rm -f "${DB_FOR_TEST}"
+        fi
+
         ${DB_COMMAND} < ${SCHEME_FOR_TEST}
     else
         DB_COMMAND="mysql -p${PASSWORD} -u ${USER}"
