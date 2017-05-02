@@ -20,7 +20,23 @@ from sqlalchemy import create_engine, MetaData
 from sqlalchemy.sql import func
 
 
-class DbBase(object):
+class SqliteDb(object):
+    __instance = None
+
+    def __new__(cls, url, **kwargs):
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls)
+            cls.__db_meta = MetaData(
+                bind=create_engine("sqlite:///" + url))
+            cls.__db_meta.reflect()
+
+            for name, table in cls.__db_meta.tables.items():
+                setattr(cls, name, table)
+
+        return cls.__instance
+
+
+class MySqlDb(object):
     __instance = None
 
     def __new__(
@@ -54,7 +70,7 @@ class DbBase(object):
 
 class BaseModel(object):
     def __init__(self, db=None):
-        self._db = db if db else DbBase()
+        self._db = db if db else MySqlDb()
 
     def get_columns(self):
         raise NotImplementedError
@@ -65,7 +81,7 @@ class BaseModel(object):
 
 class AccountModel(BaseModel):
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super().__init__(db=kwargs.get("db"))
         self.account_columns = [
             # db, html
             (self._db.Profile.c.lastName, "lastName"),
@@ -121,7 +137,7 @@ class AccountModel(BaseModel):
 
 class AbilityModel(BaseModel):
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super().__init__(db=kwargs.get("db"))
         self.ability_columns = [
             (self._db.Profile.c.lastName, "lastName"),
             (self._db.Profile.c.firstName, "firstName"),
@@ -157,7 +173,7 @@ class AbilityModel(BaseModel):
 
 class RequestModel(BaseModel):
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super().__init__(db=kwargs.get("db"))
         self.request_columns = [
             (self._db.Profile.c.lastName, "lastName"),
             (self._db.Profile.c.firstName, "firstName"),
@@ -209,7 +225,7 @@ class RequestModel(BaseModel):
 
 class PrefectureModel(BaseModel):
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super().__init__(db=kwargs.get("db"))
 
     def get_columns(self):
         return [

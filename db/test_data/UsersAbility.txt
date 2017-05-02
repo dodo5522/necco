@@ -1,4 +1,4 @@
-# id_, user_id, ability_id
+# id_, userId, abilityId
 0, 1,  1
 1, 1,  2
 2, 1,  3
