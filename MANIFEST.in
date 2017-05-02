@@ -1,3 +1,6 @@
-recursive-include *.txt
-recursive-include *.md
-recursive-include *.rst
+include *.txt
+include *.rst
+include *.md
+recursive-include db *.sh
+recursive-include db *.sql
+recursive-include db/test_data *.txt
