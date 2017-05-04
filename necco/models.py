@@ -115,7 +115,27 @@ class AccountModel(BaseModel):
 
         return password
 
-    def get_user_account(self, email):
+    def get_id(self, email):
+        """ Getter function returns user id against the specified email.
+        """
+
+        query = self._db.User.select(self._db.User.c.email == email)
+        query = query.with_only_columns([self._db.User.c.id_, ])
+
+        record = query.execute().fetchone()
+        return record[0]
+
+    def get_email(self, id_):
+        """ Getter function returns the specified user's email.
+        """
+
+        query = self._db.User.select(self._db.User.c.id_ == id_)
+        query = query.with_only_columns([self._db.User.c.email, ])
+
+        record = query.execute().fetchone()
+        return record[0]
+
+    def get_all(self, email):
         """ Getter function returns the specified user infomation.
 
             SELECT Profile.name_, Profile.kana, Profile.nickname, ... from Profile

@@ -119,8 +119,12 @@ class AccountApi(MethodView, ModelSwitcher):
     def get(self, user_id):
         """ Get user account information who logs in currently. """
 
-        email = session["username"]
-        user_info = self._model.get_user_account(email)
+        try:
+            email = self._model.get_email(user_id) if user_id else session["username"]
+            user_info = self._model.get_all(email)
+        except Exception:
+            user_info = {}
+
         return json.dumps(user_info)
 
     def post(self):
