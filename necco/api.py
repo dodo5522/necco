@@ -116,6 +116,15 @@ class AccountApi(MethodView, ModelSwitcher):
         if not self.is_model_set():
             self.set_model(AccountModel())
 
+    def post(self):
+        """ Create new user account. """
+
+        got = {key: value for key, value in request.form.items()}
+
+        # create account data via AccountModel
+
+        return json.dumps(got)
+
     def get(self, user_id):
         """ Get user account information who logs in currently. """
 
@@ -127,13 +136,16 @@ class AccountApi(MethodView, ModelSwitcher):
 
         return json.dumps(user_info)
 
-    def post(self):
-        """ Create new user account. """
+    def put(self, user_id):
+        """ Update information for the current user account. """
 
-        got = {key: item for key, item in request.form.items()}
+        got = {key: value for key, value in request.form.items()}
+
+        # create account data via AccountModel
+
         return json.dumps(got)
 
-    def put(self):
-        """ Update information for the current user account. """
+    def delete(self, user_id):
+        """ Delete the specified user account. """
 
         return "Not implemented yet"
