@@ -116,7 +116,7 @@ class AccountApi(MethodView, ModelSwitcher):
         if not self.is_model_set():
             self.set_model(AccountModel())
 
-    def get(self):
+    def get(self, user_id):
         """ Get user account information who logs in currently. """
 
         email = session["username"]

@@ -49,7 +49,10 @@ def configure_necco_app():
     app.add_url_rule(rule="/api/abilities", view_func=AbilityApi.as_view("abilities"))
     app.add_url_rule(rule="/api/requests", view_func=RequestApi.as_view("requests"))
     app.add_url_rule(rule="/api/prefs", view_func=PrefectureApi.as_view("prefs"))
-    app.add_url_rule(rule="/api/account", view_func=AccountApi.as_view("account"))
+
+    account_view = AccountApi.as_view("account")
+    app.add_url_rule(rule="/api/account", view_func=account_view, methods=["GET", ], defaults={"user_id": None})
+    app.add_url_rule(rule="/api/account/<int:user_id>", view_func=account_view, methods=["GET", ])
 
     return app
 
