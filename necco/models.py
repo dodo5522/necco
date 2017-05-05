@@ -15,9 +15,12 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from collections import OrderedDict
+from datetime import datetime
 from necco import config
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.sql import func
+from werkzeug.security import generate_password_hash
 
 
 class SqliteDb(object):
@@ -82,24 +85,22 @@ class BaseModel(object):
 class AccountModel(BaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(db=kwargs.get("db"))
-        self.account_columns = [
-            # db, html
-            (self._db.Profile.c.lastName, "lastName"),
-            (self._db.Profile.c.firstName, "firstName"),
-            (self._db.Profile.c.lastKanaName, "lastKanaName"),
-            (self._db.Profile.c.firstKanaName, "firstKanaName"),
-            (self._db.Profile.c.nickName, "nickName"),
-            (self._db.User.c.email, "email"),
-            (self._db.Prefecture.c.name_, "prefecture"),
-            (self._db.Profile.c.address, "address"),
-            (self._db.Profile.c.streetAddress, "streetAddress"),
-            (self._db.Profile.c.phoneNumber, "phoneNumber"),
-            (self._db.Profile.c.faxNumber, "faxNumber"),
-            (self._db.Profile.c.profile, "profile"),
-        ]
+        self.account_columns = OrderedDict()
+        self.account_columns["lastName"] = self._db.Profile.c.lastName
+        self.account_columns["firstName"] = self._db.Profile.c.firstName
+        self.account_columns["lastKanaName"] = self._db.Profile.c.lastKanaName
+        self.account_columns["firstKanaName"] = self._db.Profile.c.firstKanaName
+        self.account_columns["nickName"] = self._db.Profile.c.nickName
+        self.account_columns["email"] = self._db.User.c.email
+        self.account_columns["prefecture"] = self._db.Prefecture.c.name_
+        self.account_columns["address"] = self._db.Profile.c.address
+        self.account_columns["streetAddress"] = self._db.Profile.c.streetAddress
+        self.account_columns["phoneNumber"] = self._db.Profile.c.phoneNumber
+        self.account_columns["faxNumber"] = self._db.Profile.c.faxNumber
+        self.account_columns["profile"] = self._db.Profile.c.profile
 
     def get_columns(self):
-        return [c[1] for c in self.account_columns]
+        return self.account_columns.keys()
 
     def get_hashed_password(self, user_id):
         proxy = self._db.User.select(self._db.User.c.id_ == user_id).execute()
@@ -149,7 +150,38 @@ class AccountModel(BaseModel):
 
         record = joined_query.execute().fetchone()
 
-        return {str(key): str(value) for key, value in zip((c[1] for c in self.account_columns), record)}
+        return {str(key): str(value) for key, value in zip(self.account_columns.keys(), record)}
+
+    def update_user_with(self, id_, **kwargs):
+        query = self._db.User.update().where(self._db.User.c.id_==id_)
+
+        if kwargs.get("email"):
+            query = query.values(email=kwargs.get("email"))
+
+        if kwargs.get("password"):
+            hashed_password = generate_password_hash(kwargs.get("password"))
+            query = query.values(password_=hashed_password)
+
+        query.values(updatedAt=datetime.now()).execute()
+
+    def update_profile_with(self, id_, **kwargs):
+        query = self._db.Profile.update().where(self._db.Profile.c.userId==id_)
+
+        params = {"updatedAt": datetime.now()}
+        for column in self._db.Profile.c.keys():
+            val = kwargs.get(column)
+            if val:
+                params[column] = val
+
+        query.values(**params).execute()
+
+    def update_account_with(self, id_, **kwargs):
+        """ Update account information against the specified user id.
+        """
+        self.update_user_with(id_, **kwargs)
+        self.update_profile_with(id_, **kwargs)
+        # TODO:
+        # self.update_prefecture_with(id_, kwargs)
 
 
 class AbilityModel(BaseModel):

@@ -139,11 +139,12 @@ class AccountApi(MethodView, ModelSwitcher):
     def put(self, user_id):
         """ Update information for the current user account. """
 
-        got = {key: value for key, value in request.form.items()}
+        got_data = {key: value for key, value in request.form.items()}
+        user_id = user_id if user_id else session["user_id"]
 
-        # create account data via AccountModel
+        self._model.update_account_with(user_id, **got_data)
 
-        return json.dumps(got)
+        return json.dumps(got_data)
 
     def delete(self, user_id):
         """ Delete the specified user account. """

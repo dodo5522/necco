@@ -70,10 +70,10 @@ $(function() {
   $("#buttonUpdateAccount").on("click", function() {
     var sending_data = $("#formAccount").serializeArray();
     $.ajax({
-      type: "POST",
+      type: "PUT",
       url: "/api/account",
       dataType: "json",
-      data: JSON.stringify(sending_data)
+      data: sending_data
     }).done(function(data, text, jqxhr){
       $("#contentSettings").trigger("click");
     }).fail(function(jqxhr, text, error){
