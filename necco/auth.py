@@ -20,32 +20,42 @@ from werkzeug.security import check_password_hash
 
 
 class AbstractAuthentication(object):
-    def __init__(self, id_, password):
-        result = False
+    def __init__(self, email, password):
+        self._is_authenticated = False
+        self._authenticated_user_id = None
 
         try:
-            result = self._do_authentication(id_, password)
-        except ValueError as e:
+            self._is_authenticated = self._do_authentication(email, password)
+            self._authenticated_user_id = self._get_user_id(email)
+        except (ValueError, TypeError) as e:
             pass
         except:
             raise
 
-        self._is_authenticated = result
+    def _do_authentication(self, email, password):
+        raise NotImplementedError
 
-    def _do_authentication(self, id_, password):
+    def _get_user_id(self):
         raise NotImplementedError
 
     def is_authenticated(self):
         return self._is_authenticated
 
+    def get_authenticated_user_id(self):
+        return self._authenticated_user_id if self._is_authenticated else None
+
 
 class PasswordAuthentication(AbstractAuthentication):
-    def __init__(self, id_, password):
-        self.model = AccountModel()
-        super(PasswordAuthentication, self).__init__(id_, password)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    def _do_authentication(self, id_, password):
-        if not check_password_hash(self.model.get_hashed_password(id_), password):
+    def _do_authentication(self, email, password):
+        if not check_password_hash(
+                AccountModel().get_hashed_password(self._get_user_id(email)),
+                password):
             return False
 
         return True
+
+    def _get_user_id(self, email):
+        return AccountModel().get_id(email)

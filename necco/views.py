@@ -36,13 +36,13 @@ class LoginView(MethodView):
         if not auth.is_authenticated():
             return redirect("/login")
 
-        session["username"] = request.form["email"]
+        session["user_id"] = auth.get_authenticated_user_id()
         return redirect("/")
 
 
 class LogoutView(MethodView):
     def get(self):
-        session.pop("username", None)
+        session.pop("user_id", None)
         return redirect("/login")
 
 
@@ -50,7 +50,7 @@ class MainView(View):
     methods = ["GET", ]
 
     def dispatch_request(self):
-        if not session["username"]:
+        if not session["user_id"]:
             return redirect("/login")
 
         # FIXME: Dummy data. Remove it if data can be got from SQL DB.
@@ -76,7 +76,7 @@ class MainView(View):
         return render_template(
             "index.html",
             title=config.TITLE,
-            username=session["username"],
+            username=session["user_id"],
             records=records)
 
 

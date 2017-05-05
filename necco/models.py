@@ -101,11 +101,8 @@ class AccountModel(BaseModel):
     def get_columns(self):
         return [c[1] for c in self.account_columns]
 
-    def yield_record(self):
-        yield None
-
-    def get_hashed_password(self, email):
-        proxy = self._db.User.select(self._db.User.c.email == email).execute()
+    def get_hashed_password(self, user_id):
+        proxy = self._db.User.select(self._db.User.c.id_ == user_id).execute()
 
         if not proxy.rowcount:
             raise ValueError("Account not found.")
@@ -135,7 +132,7 @@ class AccountModel(BaseModel):
         record = query.execute().fetchone()
         return record[0]
 
-    def get_all(self, email):
+    def get_all(self, id_):
         """ Getter function returns the specified user infomation.
 
             SELECT Profile.name_, Profile.kana, Profile.nickname, ... from Profile
@@ -148,7 +145,7 @@ class AccountModel(BaseModel):
         joined_query = joined_query.join(
             self._db.Prefecture, self._db.Profile.c.prefectureId == self._db.Prefecture.c.id_)
         joined_query = joined_query.select(
-            self._db.User.c.email == email).with_only_columns([c[0] for c in self.account_columns])
+            self._db.User.c.id_ == id_).with_only_columns(self.account_columns.values())
 
         record = joined_query.execute().fetchone()
 

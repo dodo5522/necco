@@ -32,7 +32,7 @@ def configure_necco_app():
     def before_request():
         """ Function to be called before running app.route().
         """
-        if "username" in session:
+        if "user_id" in session:
             return None
         if "/login" in request.path:
             return None
