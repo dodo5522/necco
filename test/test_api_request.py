@@ -15,29 +15,36 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import unittest
-from unittest.mock import patch
+from mymock import AbstractAccessorToTestData
 from flask import Flask
 from necco.api import RequestApi
-from necco.models import SqliteDb, AbilityModel
+from necco.models import SqliteDb, RequestModel
 import json
+import os
 import sys
-# import subprocess as sub
-# import tempfile
+import unittest
+from unittest.mock import patch
 
 
-class TestRequestApi(unittest.TestCase):
+class TestRequestApi(unittest.TestCase, AbstractAccessorToTestData):
+    def get_db_path(self):
+        """ Override AbstractAccessorToTestData.get_db_path().
+        """
+        return self._DB_PATH.format(self.__class__.__name__)
+
     @classmethod
     def setUpClass(cls):
-        cls._db_path = "/tmp/necco_test.db"
+        pass
 
     @classmethod
     def tearDownClass(cls):
-        if 0:
-            sys.remove(cls._db_path)
+        pass
 
     def setUp(self):
-        RequestApi.set_model(AbilityModel(db=SqliteDb(self._db_path)))
+        self.initialize_db()
+
+        self._db = SqliteDb(self.get_db_path())
+        RequestApi.set_model(RequestModel(db=self._db))
 
         self._app = Flask("test")
         self._app.add_url_rule(
@@ -48,7 +55,7 @@ class TestRequestApi(unittest.TestCase):
         self._app.config["TESTING"] = True
 
     def tearDown(self):
-        delattr(self, "_app")
+        self.remove_db_if_exists()
 
     def test_get(self):
         # session_transaction() is available instead of

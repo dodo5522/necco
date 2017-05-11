@@ -15,6 +15,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from mymock import AbstractAccessorToTestData
 import unittest
 from unittest.mock import patch
 from flask import Flask
@@ -26,18 +27,25 @@ import sys
 # import tempfile
 
 
-class TestAbilityApi(unittest.TestCase):
+class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
+    def get_db_path(self):
+        """ Override AbstractAccessorToTestData.get_db_path().
+        """
+        return self._DB_PATH.format(self.__class__.__name__)
+
     @classmethod
     def setUpClass(cls):
-        cls._db_path = "/tmp/necco_test.db"
+        pass
 
     @classmethod
     def tearDownClass(cls):
-        if 0:
-            sys.remove(cls._db_path)
+        pass
 
     def setUp(self):
-        AbilityApi.set_model(AbilityModel(db=SqliteDb(self._db_path)))
+        self.initialize_db()
+
+        self._db = SqliteDb(self.get_db_path())
+        AbilityApi.set_model(AbilityModel(db=self._db))
 
         self._app = Flask("test")
         self._app.add_url_rule(
@@ -48,7 +56,7 @@ class TestAbilityApi(unittest.TestCase):
         self._app.config["TESTING"] = True
 
     def tearDown(self):
-        delattr(self, "_app")
+        self.remove_db_if_exists()
 
     def test_get(self):
         # session_transaction() is available instead of

@@ -15,40 +15,49 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import unittest
-from unittest.mock import patch
+from mymock import AbstractAccessorToTestData
 from flask import Flask
 from necco.api import AccountApi
 from necco.models import SqliteDb, AccountModel
 import json
+import os
 import sys
-# import subprocess as sub
-# import tempfile
+import unittest
+from unittest.mock import patch
 
 
-class TestAccountApi(unittest.TestCase):
+class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
+    def get_db_path(self):
+        """ Override AbstractAccessorToTestData.get_db_path().
+        """
+        return self._DB_PATH.format(self.__class__.__name__)
+
     @classmethod
     def setUpClass(cls):
-        cls._db_path = "/tmp/necco_test.db"
+        pass
 
     @classmethod
     def tearDownClass(cls):
-        if 0:
-            sys.remove(cls._db_path)
+        pass
 
     def setUp(self):
-        AccountApi.set_model(AccountModel(db=SqliteDb(self._db_path)))
+        self.initialize_db()
+
+        self._db = SqliteDb(self.get_db_path())
+        AccountApi.set_model(AccountModel(db=self._db))
 
         self._app = Flask("test")
-        self._app.add_url_rule(
-            rule="/api/account",
-            view_func=AccountApi.as_view("account"))
+
+        account_view = AccountApi.as_view("account")
+        self._app.add_url_rule(rule="/api/account", view_func=account_view, methods=["POST", ])
+        self._app.add_url_rule(rule="/api/account", view_func=account_view, methods=["GET", "PUT", "DELETE"], defaults={"user_id": None})
+        self._app.add_url_rule(rule="/api/account/<int:user_id>", view_func=account_view, methods=["GET", "PUT", "DELETE"])
 
         self._app.config["SECRET_KEY"] = "key_for_test"
         self._app.config["TESTING"] = True
 
     def tearDown(self):
-        delattr(self, "_app")
+        self.remove_db_if_exists()
 
     def test_get(self):
         # session_transaction() is available instead of
