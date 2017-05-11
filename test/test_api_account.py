@@ -67,7 +67,7 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
         # http://flask.pocoo.org/docs/dev/testing/#accessing-and-modifying-sessions
         with self._app.test_client() as c:
             with c.session_transaction() as ses:
-                ses["username"] = "taro.yamada@temp.com"
+                ses["user_id"] = 1
 
             ret = c.get("/api/account")
             got_data = json.loads(ret.data.decode("utf8"))
@@ -77,8 +77,46 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertEqual(got_data["phoneNumber"], "010-010-010", "invalid phone number")
             self.assertEqual(got_data["faxNumber"], "101-101-101", "invalid fax number")
 
-    def test_post(self):
+    def test_get_with_id(self):
         pass
+
+    def test_post(self):
+        with self._app.test_client() as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = 2
+
+            ret = c.post("/api/account", data={"name": "Saburo", "age": 12})
+            print(ret)
+
+    def test_put(self):
+        with self._app.test_client() as c:
+            user_id = 2
+
+            with c.session_transaction() as sess:
+                sess["user_id"] = user_id
+
+            ret = c.put(
+                "/api/account",
+                data={
+                    "nickName": "JIRO",
+                    "email": "jiro@for.test.com",
+                }
+            )
+
+            self.assertEquals(200, ret.status_code, "invalid status_code: {}".format(ret.status_code))
+
+            joined = self._db.Profile.join(self._db.User, self._db.Profile.c.userId == self._db.User.c.id_)
+            selected = joined.select(self._db.Profile.c.userId == user_id)
+            nick_name, email = selected.with_only_columns([self._db.Profile.c.nickName, self._db.User.c.email]).execute().fetchone()
+            self.assertEquals("JIRO", nick_name)
+            self.assertEquals("jiro@for.test.com", email)
+
+    def test_put_with_id(self):
+        pass
+
+    def test_delete(self):
+        pass
+
 
 
 if __name__ == "__main__":
