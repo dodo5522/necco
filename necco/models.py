@@ -24,19 +24,13 @@ from werkzeug.security import generate_password_hash
 
 
 class SqliteDb(object):
-    __instance = None
+    def __init__(self, path_to_db, **kwargs):
+        self.__db_meta = MetaData(
+            bind=create_engine("sqlite:///" + path_to_db))
+        self.__db_meta.reflect()
 
-    def __new__(cls, url, **kwargs):
-        if cls.__instance is None:
-            cls.__instance = object.__new__(cls)
-            cls.__db_meta = MetaData(
-                bind=create_engine("sqlite:///" + url))
-            cls.__db_meta.reflect()
-
-            for name, table in cls.__db_meta.tables.items():
-                setattr(cls, name, table)
-
-        return cls.__instance
+        for name, table in self.__db_meta.tables.items():
+            setattr(self, name, table)
 
 
 class MySqlDb(object):
