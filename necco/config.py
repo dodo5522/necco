@@ -20,7 +20,10 @@ import configparser
 _INIT = "/etc/necco/necco.ini"
 
 _parser = configparser.ConfigParser()
-_parser.read(_INIT)
+_parser.read(_INIT, encoding="UTF-8")
+
+# section_general = _parser.get("GENERAL")
+# section_general.get("", )
 
 if len(_parser.sections()) is not 0:
     TITLE = _parser["GENERAL"]["TITLE"]
