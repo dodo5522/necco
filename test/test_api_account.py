@@ -86,7 +86,6 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
                 sess["user_id"] = 2
 
             ret = c.post("/api/account", data={"name": "Saburo", "age": 12})
-            print(ret)
 
     def test_put(self):
         with self._app.test_client() as c:

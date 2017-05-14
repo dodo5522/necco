@@ -68,7 +68,6 @@ class TestRequestApi(unittest.TestCase, AbstractAccessorToTestData):
                 ses["username"] = "taro.yamada@temp.com"
 
             ret = c.get("/api/request")
-            print(ret)
 
     def test_post(self):
         pass
