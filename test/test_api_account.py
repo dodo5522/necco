@@ -72,14 +72,38 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             ret = c.get("/api/account")
             got_data = json.loads(ret.data.decode("utf8"))
 
-            self.assertEqual(200, ret.status_code, "invalid status_code")
-            self.assertEqual(got_data["email"], "taro.yamada@temp.com", "invalid email")
-            self.assertEqual(got_data["phoneNumber"], "010-010-010", "invalid phone number")
-            self.assertEqual(got_data["faxNumber"], "101-101-101", "invalid fax number")
+            self.assertEqual(200, ret.status_code)
+            self.assertEqual("taro.yamada@temp.com", got_data.get("email"))
+            self.assertEqual("山田", got_data.get("lastName"))
+            self.assertEqual("太郎", got_data.get("firstName"))
 
-    def test_get_with_id(self):
-        pass
+    def test_get_with_id_1(self):
+        with self._app.test_client() as c:
+            with c.session_transaction() as ses:
+                ses["user_id"] = 1
 
+            ret = c.get("/api/account/1")
+            got_data = json.loads(ret.data.decode("utf8"))
+
+            self.assertEqual(200, ret.status_code)
+            self.assertEqual("taro.yamada@temp.com", got_data.get("email"))
+            self.assertEqual("山田", got_data.get("lastName"))
+            self.assertEqual("太郎", got_data.get("firstName"))
+
+    def test_get_with_id_2(self):
+        with self._app.test_client() as c:
+            with c.session_transaction() as ses:
+                ses["user_id"] = 1
+
+            ret = c.get("/api/account/2")
+            got_data = json.loads(ret.data.decode("utf8"))
+
+            self.assertEqual(200, ret.status_code)
+            self.assertEqual("jiro.yamada@temp.com", got_data.get("email"))
+            self.assertEqual("山田", got_data.get("lastName"))
+            self.assertEqual("次郎", got_data.get("firstName"))
+
+    @unittest.skip("not implemented yet")
     def test_post(self):
         with self._app.test_client() as c:
             with c.session_transaction() as sess:
@@ -110,13 +134,25 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertEquals("JIRO", nick_name)
             self.assertEquals("jiro@for.test.com", email)
 
-    def test_put_with_id(self):
+    @unittest.skip("not implemented yet")
+    def test_put_with_id_1(self):
         pass
 
+    @unittest.skip("not implemented yet")
+    def test_put_with_id_2(self):
+        pass
+
+    @unittest.skip("not implemented yet")
     def test_delete(self):
         pass
 
+    @unittest.skip("not implemented yet")
+    def test_delete_with_id_1(self):
+        pass
 
+    @unittest.skip("not implemented yet")
+    def test_delete_with_id_2(self):
+        pass
 
 if __name__ == "__main__":
     unittest.main()
