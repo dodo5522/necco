@@ -1,0 +1,12 @@
+[GENERAL]
+title = Title
+docroot = /var/tmp/necco
+secret_key = necco_temprary_key
+
+[MYSQL]
+db = necco
+port = 3306
+server = localhost
+user = necco_manager
+password = necco_manager_password
+

@@ -20,13 +20,16 @@ from jinja2 import FileSystemLoader
 from necco import config
 from necco.views import LoginView, LogoutView, MainView, DebugView
 from necco.api import AbilityApi, RequestApi, PrefectureApi, AccountApi
+import os
 
 
 def configure_necco_app():
-    app = Flask(config.TITLE)
+    app = Flask(
+        config.TITLE,
+        template_folder=config.DOCROOT,
+        static_folder=os.path.join(os.path.dirname(config.DOCROOT), "static"))
 
     app.secret_key = config.SECRET_KEY
-    app.jinja_loader = FileSystemLoader([config.DOCROOT, ])
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 3600
 
     def before_request():
