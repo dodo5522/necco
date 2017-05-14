@@ -38,7 +38,7 @@ else:
     _parser["GENERAL"] = {}
     TITLE = _parser["GENERAL"]["TITLE"] = "Title"
     DOCROOT = _parser["GENERAL"]["DOCROOT"] = "/var/tmp/necco"
-    SECRET_KEY = _parser["GENERAL"]["SECRET_KEY"] = "necco temprary key"
+    SECRET_KEY = _parser["GENERAL"]["SECRET_KEY"] = "necco_temprary_key"
 
     _parser["MYSQL"] = {}
     MYSQL_DB = _parser["MYSQL"]["DB"] = "necco"

@@ -21,7 +21,6 @@ from necco.api import AccountApi
 from necco.models import SqliteDb, AccountModel
 import json
 import os
-import sys
 import unittest
 from unittest.mock import patch
 
