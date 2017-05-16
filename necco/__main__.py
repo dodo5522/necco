@@ -17,13 +17,15 @@
 
 from flask import Flask, session, request, redirect
 from jinja2 import FileSystemLoader
-from necco import config
+from necco.config import ServerConfiguration
 from necco.views import LoginView, LogoutView, MainView, DebugView
 from necco.api import AbilityApi, RequestApi, PrefectureApi, AccountApi
 import os
 
 
 def get_url_rules():
+    config = ServerConfiguration()
+
     app = Flask(
         config.TITLE,
         template_folder=config.DOCROOT,

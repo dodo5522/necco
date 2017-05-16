@@ -17,10 +17,13 @@
 
 from collections import OrderedDict
 from datetime import datetime
-from necco import config
+from necco.config import ServerConfiguration
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash
+
+
+_config = ServerConfiguration()
 
 
 class SqliteDb(object):
@@ -38,11 +41,11 @@ class MySqlDb(object):
 
     def __new__(
             cls,
-            user=config.MYSQL_USER,
-            password=config.MYSQL_PASSWORD,
-            server=config.MYSQL_SERVER,
-            port=config.MYSQL_PORT,
-            db=config.MYSQL_DB,
+            user=_config.MYSQL_USER,
+            password=_config.MYSQL_PASSWORD,
+            server=_config.MYSQL_SERVER,
+            port=_config.MYSQL_PORT,
+            db=_config.MYSQL_DB,
             url=None):
 
         if cls.__instance is None:
