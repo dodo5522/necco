@@ -23,7 +23,7 @@ from necco.api import AbilityApi, RequestApi, PrefectureApi, AccountApi
 import os
 
 
-def configure_necco_app():
+def get_url_rules():
     app = Flask(
         config.TITLE,
         template_folder=config.DOCROOT,
@@ -61,10 +61,10 @@ def configure_necco_app():
     return app
 
 
-app = configure_necco_app()
+app = get_url_rules()
 
 
-if __name__ == "__main__":
+def main(app=app):
     def after_request(r):
         """
         Add headers to both force latest IE rendering engine or Chrome Frame,
@@ -82,4 +82,8 @@ if __name__ == "__main__":
     app.debug = True
     app.add_url_rule(rule="/temp", view_func=DebugView.as_view("temp"))
 
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="127.0.0.1", port=8000)
+
+
+if __name__ == "__main__":
+    main()
