@@ -155,8 +155,8 @@ class AccountModel(BaseModel):
         if kwargs.get("email"):
             query = query.values(email=kwargs.get("email"))
 
-        if kwargs.get("password"):
-            hashed_password = generate_password_hash(kwargs.get("password"))
+        if kwargs.get("password_"):
+            hashed_password = generate_password_hash(kwargs.get("password_"))
             query = query.values(password_=hashed_password)
 
         query.values(updatedAt=datetime.now()).execute()

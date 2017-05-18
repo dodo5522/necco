@@ -23,6 +23,7 @@ import json
 import os
 import unittest
 from unittest.mock import patch
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
@@ -76,7 +77,7 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertEqual("山田", got_data.get("lastName"))
             self.assertEqual("太郎", got_data.get("firstName"))
 
-    def test_get_with_id_1(self):
+    def test_get_with_valid_id(self):
         with self._app.test_client() as c:
             with c.session_transaction() as ses:
                 ses["user_id"] = 1
@@ -89,11 +90,6 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertEqual("山田", got_data.get("lastName"))
             self.assertEqual("太郎", got_data.get("firstName"))
 
-    def test_get_with_id_2(self):
-        with self._app.test_client() as c:
-            with c.session_transaction() as ses:
-                ses["user_id"] = 1
-
             ret = c.get("/api/account/2")
             got_data = json.loads(ret.data.decode("utf8"))
 
@@ -101,6 +97,19 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertEqual("jiro.yamada@temp.com", got_data.get("email"))
             self.assertEqual("山田", got_data.get("lastName"))
             self.assertEqual("次郎", got_data.get("firstName"))
+
+    def test_get_with_invalid_id(self):
+        with self._app.test_client() as c:
+            with c.session_transaction() as ses:
+                ses["user_id"] = 1
+
+            ret = c.get("/api/account/999")
+            got_data = json.loads(ret.data.decode("utf8"))
+
+            self.assertEqual(200, ret.status_code)
+            self.assertEqual(None, got_data.get("email"))
+            self.assertEqual(None, got_data.get("lastName"))
+            self.assertEqual(None, got_data.get("firstName"))
 
     @unittest.skip("not implemented yet")
     def test_post(self):
@@ -120,18 +129,81 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             ret = c.put(
                 "/api/account",
                 data={
-                    "nickName": "JIRO",
-                    "email": "jiro@for.test.com",
+                    "email": "hoge@hoge.com",
+                    "password_": "hoge's password",
+                    "userId": str(user_id),
+                    "lastName": "捕鯨",
+                    "firstName": "穂芸",
+                    "lastKanaName": "ほげい",
+                    "firstKanaName": "ホゲイ",
+                    "nickName": "ほげら",
+                    "phoneNumber": "01-234-5678",
+                    "faxNumber": "02-345-6789",
+                    "prefectureId": "11", # 埼玉県
+                    "address": "上尾市",
+                    "streetAddress": "プリムヴェールシャンテ",
+                    "latitude": "0.25",
+                    "longitude": "0.5",
+                    "profile": "趣味は機械学習モデル実装です",
+                    # TODO: このへんもjs含めて実装
+                    # "abilities": [
+                    #     {
+                    #         "id_": "",
+                    #         "genre": "",
+                    #         "detail": "",
+                    #     },
+                    # "requests": [
+                    #     {
+                    #         "id_": "",
+                    #         "genre": "",
+                    #         "detail": "",
+                    #     },
                 }
             )
 
-            self.assertEquals(200, ret.status_code, "invalid status_code: {}".format(ret.status_code))
+            columns = [
+                self._db.User.c.email,
+                self._db.User.c.password_,
+                self._db.Profile.c.userId,
+                self._db.Profile.c.lastName,
+                self._db.Profile.c.firstName,
+                self._db.Profile.c.lastKanaName,
+                self._db.Profile.c.firstKanaName,
+                self._db.Profile.c.nickName,
+                self._db.Profile.c.phoneNumber,
+                self._db.Profile.c.faxNumber,
+                self._db.Profile.c.prefectureId,
+                self._db.Profile.c.address,
+                self._db.Profile.c.streetAddress,
+                self._db.Profile.c.latitude,
+                self._db.Profile.c.longitude,
+                self._db.Profile.c.profile,
+            ]
+
+            self.assertEqual(200, ret.status_code)
 
             joined = self._db.Profile.join(self._db.User, self._db.Profile.c.userId == self._db.User.c.id_)
             selected = joined.select(self._db.Profile.c.userId == user_id)
-            nick_name, email = selected.with_only_columns([self._db.Profile.c.nickName, self._db.User.c.email]).execute().fetchone()
-            self.assertEquals("JIRO", nick_name)
-            self.assertEquals("jiro@for.test.com", email)
+
+            result = selected.with_only_columns(columns).execute().fetchall()
+
+            self.assertEqual(1, len(result))
+            self.assertEqual("hoge@hoge.com", result[0][columns.index(self._db.User.c.email)])
+            self.assertTrue(check_password_hash(result[0][columns.index(self._db.User.c.password_)], "hoge's password"))
+            self.assertEqual(user_id, result[0][columns.index(self._db.Profile.c.userId)])
+            self.assertEqual("捕鯨", result[0][columns.index(self._db.Profile.c.lastName)])
+            self.assertEqual("穂芸", result[0][columns.index(self._db.Profile.c.firstName)])
+            self.assertEqual("ほげい", result[0][columns.index(self._db.Profile.c.lastKanaName)])
+            self.assertEqual("ホゲイ", result[0][columns.index(self._db.Profile.c.firstKanaName)])
+            self.assertEqual("ほげら", result[0][columns.index(self._db.Profile.c.nickName)])
+            self.assertEqual("01-234-5678", result[0][columns.index(self._db.Profile.c.phoneNumber)])
+            self.assertEqual("02-345-6789", result[0][columns.index(self._db.Profile.c.faxNumber)])
+            self.assertEqual(11, result[0][columns.index(self._db.Profile.c.prefectureId)])
+            self.assertEqual("上尾市", result[0][columns.index(self._db.Profile.c.address)])
+            self.assertEqual("プリムヴェールシャンテ", result[0][columns.index(self._db.Profile.c.streetAddress)])
+            self.assertEqual(0.25, result[0][columns.index(self._db.Profile.c.latitude)])
+            self.assertEqual(0.5, result[0][columns.index(self._db.Profile.c.longitude)])
+            self.assertEqual("趣味は機械学習モデル実装です", result[0][columns.index(self._db.Profile.c.profile)])
 
     @unittest.skip("not implemented yet")
     def test_put_with_id_1(self):
