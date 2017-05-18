@@ -16,17 +16,20 @@
 #   limitations under the License.
 
 import json
-from necco import config
+from necco.config import ServerConfiguration
 from necco.auth import PasswordAuthentication
 from flask import render_template, session, request, redirect
 from flask.views import View, MethodView
+
+
+_config = ServerConfiguration()
 
 
 class LoginView(MethodView):
     def get(self):
         return render_template(
             "login.html",
-            title=config.TITLE)
+            title=_config.TITLE)
 
     def post(self):
         auth = PasswordAuthentication(
@@ -36,13 +39,13 @@ class LoginView(MethodView):
         if not auth.is_authenticated():
             return redirect("/login")
 
-        session["username"] = request.form["email"]
+        session["user_id"] = auth.get_authenticated_user_id()
         return redirect("/")
 
 
 class LogoutView(MethodView):
     def get(self):
-        session.pop("username", None)
+        session.pop("user_id", None)
         return redirect("/login")
 
 
@@ -50,7 +53,7 @@ class MainView(View):
     methods = ["GET", ]
 
     def dispatch_request(self):
-        if not session["username"]:
+        if not session["user_id"]:
             return redirect("/login")
 
         # FIXME: Dummy data. Remove it if data can be got from SQL DB.
@@ -75,8 +78,8 @@ class MainView(View):
 
         return render_template(
             "index.html",
-            title=config.TITLE,
-            username=session["username"],
+            title=_config.TITLE,
+            username=session["user_id"],
             records=records)
 
 

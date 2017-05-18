@@ -15,21 +15,37 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from necco import config
+from collections import OrderedDict
+from datetime import datetime
+from necco.config import ServerConfiguration
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.sql import func
+from werkzeug.security import generate_password_hash
 
 
-class DbBase(object):
+_config = ServerConfiguration()
+
+
+class SqliteDb(object):
+    def __init__(self, path_to_db, **kwargs):
+        self.__db_meta = MetaData(
+            bind=create_engine("sqlite:///" + path_to_db))
+        self.__db_meta.reflect()
+
+        for name, table in self.__db_meta.tables.items():
+            setattr(self, name, table)
+
+
+class MySqlDb(object):
     __instance = None
 
     def __new__(
             cls,
-            user=config.MYSQL_USER,
-            password=config.MYSQL_PASSWORD,
-            server=config.MYSQL_SERVER,
-            port=config.MYSQL_PORT,
-            db=config.MYSQL_DB,
+            user=_config.MYSQL_USER,
+            password=_config.MYSQL_PASSWORD,
+            server=_config.MYSQL_SERVER,
+            port=_config.MYSQL_PORT,
+            db=_config.MYSQL_DB,
             url=None):
 
         if cls.__instance is None:
@@ -54,7 +70,7 @@ class DbBase(object):
 
 class BaseModel(object):
     def __init__(self, db=None):
-        self._db = db if db else DbBase()
+        self._db = db if db else MySqlDb()
 
     def get_columns(self):
         raise NotImplementedError
@@ -65,31 +81,26 @@ class BaseModel(object):
 
 class AccountModel(BaseModel):
     def __init__(self, *args, **kwargs):
-        super().__init__()
-        self.account_columns = [
-            # db, html
-            (self._db.Profile.c.lastName, "lastName"),
-            (self._db.Profile.c.firstName, "firstName"),
-            (self._db.Profile.c.lastKanaName, "lastKanaName"),
-            (self._db.Profile.c.firstKanaName, "firstKanaName"),
-            (self._db.Profile.c.nickName, "nickName"),
-            (self._db.User.c.email, "email"),
-            (self._db.Prefecture.c.name_, "prefecture"),
-            (self._db.Profile.c.address, "address"),
-            (self._db.Profile.c.streetAddress, "streetAddress"),
-            (self._db.Profile.c.phoneNumber, "phoneNumber"),
-            (self._db.Profile.c.faxNumber, "faxNumber"),
-            (self._db.Profile.c.profile, "profile"),
-        ]
+        super().__init__(db=kwargs.get("db"))
+        self.account_columns = OrderedDict()
+        self.account_columns["lastName"] = self._db.Profile.c.lastName
+        self.account_columns["firstName"] = self._db.Profile.c.firstName
+        self.account_columns["lastKanaName"] = self._db.Profile.c.lastKanaName
+        self.account_columns["firstKanaName"] = self._db.Profile.c.firstKanaName
+        self.account_columns["nickName"] = self._db.Profile.c.nickName
+        self.account_columns["email"] = self._db.User.c.email
+        self.account_columns["prefecture"] = self._db.Prefecture.c.name_
+        self.account_columns["address"] = self._db.Profile.c.address
+        self.account_columns["streetAddress"] = self._db.Profile.c.streetAddress
+        self.account_columns["phoneNumber"] = self._db.Profile.c.phoneNumber
+        self.account_columns["faxNumber"] = self._db.Profile.c.faxNumber
+        self.account_columns["profile"] = self._db.Profile.c.profile
 
     def get_columns(self):
-        return [c[1] for c in self.account_columns]
+        return self.account_columns.keys()
 
-    def yield_record(self):
-        yield None
-
-    def get_hashed_password(self, email):
-        proxy = self._db.User.select(self._db.User.c.email == email).execute()
+    def get_hashed_password(self, user_id):
+        proxy = self._db.User.select(self._db.User.c.id_ == user_id).execute()
 
         if not proxy.rowcount:
             raise ValueError("Account not found.")
@@ -99,7 +110,27 @@ class AccountModel(BaseModel):
 
         return password
 
-    def get_user_account(self, email):
+    def get_id(self, email):
+        """ Getter function returns user id against the specified email.
+        """
+
+        query = self._db.User.select(self._db.User.c.email == email)
+        query = query.with_only_columns([self._db.User.c.id_, ])
+
+        record = query.execute().fetchone()
+        return record[0]
+
+    def get_email(self, id_):
+        """ Getter function returns the specified user's email.
+        """
+
+        query = self._db.User.select(self._db.User.c.id_ == id_)
+        query = query.with_only_columns([self._db.User.c.email, ])
+
+        record = query.execute().fetchone()
+        return record[0]
+
+    def get_all(self, id_):
         """ Getter function returns the specified user infomation.
 
             SELECT Profile.name_, Profile.kana, Profile.nickname, ... from Profile
@@ -112,16 +143,47 @@ class AccountModel(BaseModel):
         joined_query = joined_query.join(
             self._db.Prefecture, self._db.Profile.c.prefectureId == self._db.Prefecture.c.id_)
         joined_query = joined_query.select(
-            self._db.User.c.email == email).with_only_columns([c[0] for c in self.account_columns])
+            self._db.User.c.id_ == id_).with_only_columns(self.account_columns.values())
 
         record = joined_query.execute().fetchone()
 
-        return {str(key): str(value) for key, value in zip((c[1] for c in self.account_columns), record)}
+        return {str(key): str(value) for key, value in zip(self.account_columns.keys(), record)}
+
+    def update_user_with(self, id_, **kwargs):
+        query = self._db.User.update().where(self._db.User.c.id_==id_)
+
+        if kwargs.get("email"):
+            query = query.values(email=kwargs.get("email"))
+
+        if kwargs.get("password_"):
+            hashed_password = generate_password_hash(kwargs.get("password_"))
+            query = query.values(password_=hashed_password)
+
+        query.values(updatedAt=datetime.now()).execute()
+
+    def update_profile_with(self, id_, **kwargs):
+        query = self._db.Profile.update().where(self._db.Profile.c.userId==id_)
+
+        params = {"updatedAt": datetime.now()}
+        for column in self._db.Profile.c.keys():
+            val = kwargs.get(column)
+            if val:
+                params[column] = val
+
+        query.values(**params).execute()
+
+    def update_account_with(self, id_, **kwargs):
+        """ Update account information against the specified user id.
+        """
+        self.update_user_with(id_, **kwargs)
+        self.update_profile_with(id_, **kwargs)
+        # TODO:
+        # self.update_prefecture_with(id_, kwargs)
 
 
 class AbilityModel(BaseModel):
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super().__init__(db=kwargs.get("db"))
         self.ability_columns = [
             (self._db.Profile.c.lastName, "lastName"),
             (self._db.Profile.c.firstName, "firstName"),
@@ -157,7 +219,7 @@ class AbilityModel(BaseModel):
 
 class RequestModel(BaseModel):
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super().__init__(db=kwargs.get("db"))
         self.request_columns = [
             (self._db.Profile.c.lastName, "lastName"),
             (self._db.Profile.c.firstName, "firstName"),
@@ -209,7 +271,7 @@ class RequestModel(BaseModel):
 
 class PrefectureModel(BaseModel):
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super().__init__(db=kwargs.get("db"))
 
     def get_columns(self):
         return [

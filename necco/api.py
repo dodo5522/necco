@@ -21,17 +21,31 @@ from flask.views import MethodView
 from necco.models import AccountModel, AbilityModel, RequestModel, PrefectureModel
 
 
-class AbilityApi(MethodView):
+class ModelSwitcher(object):
+    _model = None
+
+    @classmethod
+    def set_model(cls, model):
+        cls._model = model
+
+    @classmethod
+    def is_model_set(cls):
+        return cls._model is not None
+
+
+
+class AbilityApi(MethodView, ModelSwitcher):
     """ for route of /api/abilities """
 
     def __init__(self, *args, **kwargs):
-        super(AbilityApi, self).__init__(*args, **kwargs)
-        self.model = AbilityModel()
+        super().__init__(*args, **kwargs)
+        if not self.is_model_set():
+            self.set_model(AbilityModel())
 
     def get(self):
         try:
-            columns = request.args if request.args else self.model.get_columns()
-            abilities = [{columns[i]: r[i] for i in range(len(columns))} for r in self.model.yield_record()]
+            columns = request.args if request.args else self._model.get_columns()
+            abilities = [{columns[i]: r[i] for i in range(len(columns))} for r in self._model.yield_record()]
         except:
             columns = abilities = []
 
@@ -47,17 +61,18 @@ class AbilityApi(MethodView):
         return "<html><body>Not implemented yet.</body></html>"
 
 
-class RequestApi(MethodView):
+class RequestApi(MethodView, ModelSwitcher):
     """ for route of /api/requests """
 
     def __init__(self, *args, **kwargs):
         super(RequestApi, self).__init__(*args, **kwargs)
-        self.model = RequestModel()
+        if not self.is_model_set():
+            self.set_model(RequestModel())
 
     def get(self):
         try:
-            columns = request.args if request.args else self.model.get_columns()
-            requests = [{columns[i]: r[i] for i in range(len(columns))} for r in self.model.yield_record()]
+            columns = request.args if request.args else self._model.get_columns()
+            requests = [{columns[i]: r[i] for i in range(len(columns))} for r in self._model.yield_record()]
         except:
             columns = requests = []
 
@@ -73,16 +88,17 @@ class RequestApi(MethodView):
         return "<html><body>Not implemented yet.</body></html>"
 
 
-class PrefectureApi(MethodView):
+class PrefectureApi(MethodView, ModelSwitcher):
     """ for route of /api/prefs """
 
     def __init__(self, *args, **kwargs):
         super(PrefectureApi, self).__init__(*args, **kwargs)
-        self.model = PrefectureModel()
+        if not self.is_model_set():
+            self.set_model(PrefectureModel())
 
     def get(self):
         columns = ["id", "name"]
-        prefs = [{columns[i]: r[i] for i in range(len(columns))} for r in self.model.yield_record()]
+        prefs = [{columns[i]: r[i] for i in range(len(columns))} for r in self._model.yield_record()]
 
         sending_obj = {
             "length": len(prefs),
@@ -92,27 +108,45 @@ class PrefectureApi(MethodView):
         return json.dumps(sending_obj)
 
 
-class AccountApi(MethodView):
+class AccountApi(MethodView, ModelSwitcher):
     """ for route of "/api/account" """
 
     def __init__(self, *args, **kwargs):
-        super(AccountApi, self).__init__(*args, **kwargs)
-        self.model = AccountModel()
-
-    def get(self):
-        """ Get user account information who logs in currently. """
-
-        email = session["username"]
-        user_info = self.model.get_user_account(email)
-        return json.dumps(user_info)
+        super().__init__(*args, **kwargs)
+        if not self.is_model_set():
+            self.set_model(AccountModel())
 
     def post(self):
         """ Create new user account. """
 
-        got = {key: item for key, item in request.form.items()}
+        got = {key: value for key, value in request.form.items()}
+
+        # create account data via AccountModel
+
         return json.dumps(got)
 
-    def put(self):
+    def get(self, user_id):
+        """ Get user account information who logs in currently. """
+
+        try:
+            id_ = user_id if user_id else session["user_id"]
+            user_info = self._model.get_all(id_)
+        except Exception:
+            user_info = {}
+
+        return json.dumps(user_info)
+
+    def put(self, user_id):
         """ Update information for the current user account. """
+
+        got_data = {key: value for key, value in request.form.items()}
+        user_id = user_id if user_id else session["user_id"]
+
+        self._model.update_account_with(user_id, **got_data)
+
+        return json.dumps(got_data)
+
+    def delete(self, user_id):
+        """ Delete the specified user account. """
 
         return "Not implemented yet"

@@ -17,22 +17,27 @@
 
 from flask import Flask, session, request, redirect
 from jinja2 import FileSystemLoader
-from necco import config
+from necco.config import ServerConfiguration
 from necco.views import LoginView, LogoutView, MainView, DebugView
 from necco.api import AbilityApi, RequestApi, PrefectureApi, AccountApi
+import os
 
 
-def configure_necco_app():
-    app = Flask(config.TITLE)
+def get_url_rules():
+    config = ServerConfiguration()
+
+    app = Flask(
+        config.TITLE,
+        template_folder=config.DOCROOT,
+        static_folder=os.path.join(os.path.dirname(config.DOCROOT), "static"))
 
     app.secret_key = config.SECRET_KEY
-    app.jinja_loader = FileSystemLoader([config.DOCROOT, ])
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 3600
 
     def before_request():
         """ Function to be called before running app.route().
         """
-        if "username" in session:
+        if "user_id" in session:
             return None
         if "/login" in request.path:
             return None
@@ -49,15 +54,19 @@ def configure_necco_app():
     app.add_url_rule(rule="/api/abilities", view_func=AbilityApi.as_view("abilities"))
     app.add_url_rule(rule="/api/requests", view_func=RequestApi.as_view("requests"))
     app.add_url_rule(rule="/api/prefs", view_func=PrefectureApi.as_view("prefs"))
-    app.add_url_rule(rule="/api/account", view_func=AccountApi.as_view("account"))
+
+    account_view = AccountApi.as_view("account")
+    app.add_url_rule(rule="/api/account", view_func=account_view, methods=["POST", ])
+    app.add_url_rule(rule="/api/account", view_func=account_view, methods=["GET", "PUT", "DELETE"], defaults={"user_id": None})
+    app.add_url_rule(rule="/api/account/<int:user_id>", view_func=account_view, methods=["GET", "PUT", "DELETE"])
 
     return app
 
 
-app = configure_necco_app()
+app = get_url_rules()
 
 
-if __name__ == "__main__":
+def main(app=app):
     def after_request(r):
         """
         Add headers to both force latest IE rendering engine or Chrome Frame,
@@ -75,4 +84,8 @@ if __name__ == "__main__":
     app.debug = True
     app.add_url_rule(rule="/temp", view_func=DebugView.as_view("temp"))
 
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="127.0.0.1", port=8000)
+
+
+if __name__ == "__main__":
+    main()

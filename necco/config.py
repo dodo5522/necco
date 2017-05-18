@@ -16,33 +16,63 @@
 #   limitations under the License.
 
 import configparser
+import os
 
-_INIT = "/etc/necco/necco.ini"
 
-_parser = configparser.ConfigParser()
-_parser.read(_INIT)
+class ServerConfiguration(object):
+    _DEFAULTS = {
+        "GENERAL": {
+            "TITLE": "Title",
+            "DOCROOT": "/var/tmp/necco",
+            "SECRET_KEY": "necco_temporary_key",
+        },
+        "MYSQL": {
+            "DB": "necco",
+            "PORT": "3306",
+            "SERVER": "localhost",
+            "USER": "guest",
+            "PASSWORD": "guest's password",
+        },
+    }
 
-if len(_parser.sections()) is not 0:
-    TITLE = _parser["GENERAL"]["TITLE"]
-    DOCROOT = _parser["GENERAL"]["DOCROOT"]
-    SECRET_KEY = _parser["GENERAL"]["SECRET_KEY"]
-    MYSQL_DB = _parser["MYSQL"]["DB"]
-    MYSQL_PORT = int(_parser["MYSQL"]["PORT"])
-    MYSQL_SERVER = _parser["MYSQL"]["SERVER"]
-    MYSQL_USER = _parser["MYSQL"]["USER"]
-    MYSQL_PASSWORD = _parser["MYSQL"]["PASSWORD"]
-else:
-    _parser["GENERAL"] = {}
-    TITLE = _parser["GENERAL"]["TITLE"] = "Title"
-    DOCROOT = _parser["GENERAL"]["DOCROOT"] = "/var/tmp/necco"
-    SECRET_KEY = _parser["GENERAL"]["SECRET_KEY"] = "necco temprary key"
+    def __init__(self, file_path="/etc/necco/necco.ini"):
+        """ Set configuration based on the specified file.
 
-    _parser["MYSQL"] = {}
-    MYSQL_DB = _parser["MYSQL"]["DB"] = "necco"
-    MYSQL_PORT = _parser["MYSQL"]["PORT"] = "3306"
-    MYSQL_SERVER = _parser["MYSQL"]["SERVER"] = "localhost"
-    MYSQL_USER = _parser["MYSQL"]["USER"] = "guest"
-    MYSQL_PASSWORD = _parser["MYSQL"]["PASSWORD"] = "guest's password"
+        returns:
+            Default configuration data dict.
+        raises:
+            PermissionError: If configuration file cannot be written on the specified path.
+        """
+        def get_default_parser():
+            parser = configparser.ConfigParser()
 
-    with open(_INIT, "w") as c:
-        _parser.write(c)
+            for section in self._DEFAULTS.keys():
+                parser.add_section(section)
+
+                for option in self._DEFAULTS.get(section).keys():
+                    parser.set(section, option, self._DEFAULTS.get(section).get(option))
+
+            return parser
+
+        if os.path.exists(file_path):
+            parser = configparser.ConfigParser()
+            parser.read(file_path, encoding="UTF-8")
+        else:
+            parser = get_default_parser()
+            try:
+                with open(file_path, "w") as f:
+                    parser.write(f)
+            except PermissionError as e:
+                pass
+            except Exception as e:
+                # TODO: logging or something
+                raise
+
+        self.TITLE = parser["GENERAL"]["TITLE"]
+        self.DOCROOT = parser["GENERAL"]["DOCROOT"]
+        self.SECRET_KEY = parser["GENERAL"]["SECRET_KEY"]
+        self.MYSQL_DB = parser["MYSQL"]["DB"]
+        self.MYSQL_PORT = int(parser["MYSQL"]["PORT"])
+        self.MYSQL_SERVER = parser["MYSQL"]["SERVER"]
+        self.MYSQL_USER = parser["MYSQL"]["USER"]
+        self.MYSQL_PASSWORD = parser["MYSQL"]["PASSWORD"]

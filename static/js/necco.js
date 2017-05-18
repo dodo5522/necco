@@ -36,7 +36,7 @@ var prepareContent = function(type_) {
 var sortRecordsByKana = function(records) {
   return records.sort(
     function(first, second) {
-      if(first.kana > second.kana) { return 1; }
+      if(first.lastKanaName > second.lastKanaName) { return 1; }
       else if(first.kana < second.kana) { return -1; }
       else { return 0; }
     })
@@ -69,12 +69,21 @@ $(function() {
 
   $("#buttonUpdateAccount").on("click", function() {
     var sending_data = $("#formAccount").serializeArray();
-    //var ret = $.ajax({
-    //  type: "POST",
-    //  url: "/api/account",
-    //  dataType: "json",
-    //  data: "",
-    //});
+    $.ajax({
+      type: "PUT",
+      url: "/api/account",
+      dataType: "json",
+      data: sending_data
+    }).done(function(data, text, jqxhr){
+      if(text==="success"){
+      	alert("成功しました");
+      }
+      else{
+      	alert("情報更新に失敗しました");
+      }
+    }).fail(function(jqxhr, text, error){
+      alert("失敗しました的なメッセージを表示しよう");
+    });
   });
 
   $("#navbarItemAbilities").on("click", function() {
