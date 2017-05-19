@@ -8,13 +8,25 @@ $(function() {
       data: sending_data
     }).done(function(data, text, jqxhr){
       if(text==="success"){
-      	alert("成功しました");
+        swal({
+          title:"　",
+          text:"情報を更新しました",
+          confirmButtonText: "了解！",
+          type:"success"});
       }
       else{
-      	alert("情報更新に失敗しました");
+        swal({
+          title:"　",
+          text:"情報を更新できませんでした",
+          confirmButtonText: "しぶしぶ了解！",
+          type:"error"});
       }
     }).fail(function(jqxhr, text, error){
-      alert("失敗しました的なメッセージを表示しよう");
+      swal({
+        title:"　",
+        text:"情報を更新できませんでした",
+        confirmButtonText: "しぶしぶ了解！",
+        type:"error"});
     });
   });
 });
