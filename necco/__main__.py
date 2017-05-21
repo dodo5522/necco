@@ -23,7 +23,7 @@ from necco.api import AbilityApi, RequestApi, PrefectureApi, AccountApi
 import os
 
 
-def get_url_rules():
+def create_application():
     config = ServerConfiguration()
 
     app = Flask(
@@ -48,6 +48,10 @@ def get_url_rules():
 
     app.before_request(before_request)
 
+    return app
+
+
+def set_url_rules(app):
     app.add_url_rule(rule="/login", view_func=LoginView.as_view("login"))
     app.add_url_rule(rule="/logout", view_func=LogoutView.as_view("logout"))
     app.add_url_rule(rule="/", view_func=MainView.as_view("index"))
@@ -63,7 +67,7 @@ def get_url_rules():
     return app
 
 
-app = get_url_rules()
+app = set_url_rules(create_application())
 
 
 def main(app=app):
