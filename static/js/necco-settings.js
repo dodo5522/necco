@@ -29,4 +29,12 @@ $(function() {
         type:"error"});
     });
   });
+
+  $("#buttonAddAbility").on("click", function(){
+    swal("できること追加")
+  });
+
+  $("#buttonAddRequest").on("click", function(){
+    swal("してほしいこと追加")
+  });
 });
