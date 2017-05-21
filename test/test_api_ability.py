@@ -48,9 +48,10 @@ class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
         AbilityApi.set_model(AbilityModel(db=self._db))
 
         self._app = Flask("test")
-        self._app.add_url_rule(
-            rule="/api/ability",
-            view_func=AbilityApi.as_view("ability"))
+
+        abilities_view = AbilityApi.as_view("abilities")
+        self._app.add_url_rule(rule="/api/abilities", view_func=abilities_view, methods=["GET", ], defaults={"user_id": None})
+        self._app.add_url_rule(rule="/api/abilities/<int:user_id>", view_func=abilities_view, methods=["GET", "PUT", "POST", "DELETE"])
 
         self._app.config["SECRET_KEY"] = "key_for_test"
         self._app.config["TESTING"] = True
@@ -58,7 +59,7 @@ class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
     def tearDown(self):
         self.remove_db_if_exists()
 
-    def test_get(self):
+    def test_get_all_users_abilities(self):
         # session_transaction() is available instead of
         # patch.dict("necco.api.session", {"username": "taro.yamada@temp.com"}).
         # Patching session leads RuntimeError: Working outside of request context.
@@ -66,11 +67,83 @@ class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
         # http://flask.pocoo.org/docs/dev/testing/#accessing-and-modifying-sessions
         with self._app.test_client() as c:
             with c.session_transaction() as ses:
-                ses["username"] = "taro.yamada@temp.com"
+                ses["user_id"] = 1
 
-            ret = c.get("/api/ability")
+            ret = c.get("/api/abilities")
+            data = json.loads(ret.data.decode("utf-8"))
 
-    def test_post(self):
+            self.assertEqual(200, ret.status_code)
+            self.assertIn("length", data)
+            self.assertIn("columns", data)
+            self.assertIn("body", data)
+
+            self.assertEqual(4, data.get("length"))
+            self.assertEqual(5, len(data.get("columns")))
+            self.assertIn("firstName", data.get("columns"))
+            self.assertIn("lastName", data.get("columns"))
+            self.assertIn("firstKanaName", data.get("columns"))
+            self.assertIn("lastKanaName", data.get("columns"))
+            self.assertIn("detail", data.get("columns"))
+            self.assertEqual("太郎", data.get("body")[0].get("firstName"))
+            self.assertEqual("太郎", data.get("body")[1].get("firstName"))
+            self.assertEqual("太郎", data.get("body")[2].get("firstName"))
+            self.assertEqual("次郎", data.get("body")[3].get("firstName"))
+            self.assertEqual("植物の水やり", data.get("body")[0].get("detail"))
+            self.assertEqual("子守り", data.get("body")[1].get("detail"))
+            self.assertEqual("犬の散歩", data.get("body")[2].get("detail"))
+            self.assertEqual("子守り", data.get("body")[3].get("detail"))
+
+    def test_get_a_users_abilities(self):
+        with self._app.test_client() as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = 2
+
+            ret = c.get("/api/abilities/{}".format(1)) # 山田太郎のデータを取得
+            data = json.loads(ret.data.decode("utf-8"))
+
+            self.assertEqual(200, ret.status_code)
+            self.assertIn("length", data)
+            self.assertIn("columns", data)
+            self.assertIn("body", data)
+
+            self.assertEqual(3, data.get("length"))
+            self.assertEqual(1, len(data.get("columns")))
+            self.assertIn("genre", data.get("columns"))
+            self.assertIn("detail", data.get("columns"))
+            self.assertEqual("", data.get("body")[0].get("genre"))
+            self.assertEqual("植物の水やり", data.get("body")[0].get("detail"))
+            self.assertEqual("", data.get("body")[1].get("genre"))
+            self.assertEqual("子守り", data.get("body")[1].get("detail"))
+            self.assertEqual("", data.get("body")[2].get("genre"))
+            self.assertEqual("犬の散歩", data.get("body")[2].get("detail"))
+
+    def test_get_an_invalid_users_abilities(self):
+        with self._app.test_client() as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = 1
+
+            ret = c.get("/api/abilities/{}".format(0xffffffffffffffffffffffffffffffff))
+            data = json.loads(ret.data.decode("utf-8"))
+
+            self.assertEqual(200, ret.status_code)
+            self.assertIsNone(data)
+
+    def test_put_to_update_a_users_ability(self):
+        test_user_id = 1
+
+        with self._app.test_client() as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = test_user_id
+
+            ret = c.get("/api/abilities/{}".format(test_user_id))
+
+    def test_put_to_update_a_users_abilities(self):
+        pass
+
+    def test_post_to_create_a_users_abilities(self):
+        pass
+
+    def test_delete_a_users_ability(self):
         pass
 
 

@@ -42,7 +42,7 @@ class AbilityApi(MethodView, ModelSwitcher):
         if not self.is_model_set():
             self.set_model(AbilityModel())
 
-    def get(self):
+    def get(self, user_id):
         try:
             columns = request.args if request.args else self._model.get_columns()
             abilities = [{columns[i]: r[i] for i in range(len(columns))} for r in self._model.yield_record()]
@@ -57,7 +57,13 @@ class AbilityApi(MethodView, ModelSwitcher):
 
         return json.dumps(sending_obj)
 
-    def post(self):
+    def post(self, user_id):
+        return "<html><body>Not implemented yet.</body></html>"
+
+    def put(self, user_id):
+        return "<html><body>Not implemented yet.</body></html>"
+
+    def delete(self, user_id):
         return "<html><body>Not implemented yet.</body></html>"
 
 
