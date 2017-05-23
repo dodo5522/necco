@@ -57,7 +57,8 @@ class MySqlDb(object):
                     PASSWORD=password,
                     SERVER=server,
                     PORT=port,
-                    DB=db)) if url is None else create_engine(url)
+                    DB=db),
+                pool_recycle=14400) if url is None else create_engine(url)
 
             cls.__db_meta = MetaData(bind=engine)
             cls.__db_meta.reflect()
