@@ -78,11 +78,12 @@ class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertIn("body", data)
 
             self.assertEqual(4, data.get("length"))
-            self.assertEqual(5, len(data.get("columns")))
+            self.assertEqual(6, len(data.get("columns")))
             self.assertIn("firstName", data.get("columns"))
             self.assertIn("lastName", data.get("columns"))
             self.assertIn("firstKanaName", data.get("columns"))
             self.assertIn("lastKanaName", data.get("columns"))
+            self.assertIn("genre", data.get("columns"))
             self.assertIn("detail", data.get("columns"))
             self.assertEqual("太郎", data.get("body")[0].get("firstName"))
             self.assertEqual("太郎", data.get("body")[1].get("firstName"))
@@ -92,6 +93,10 @@ class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertEqual("子守り", data.get("body")[1].get("detail"))
             self.assertEqual("犬の散歩", data.get("body")[2].get("detail"))
             self.assertEqual("子守り", data.get("body")[3].get("detail"))
+            self.assertEqual("", data.get("body")[0].get("genre"))
+            self.assertEqual("", data.get("body")[1].get("genre"))
+            self.assertEqual("", data.get("body")[2].get("genre"))
+            self.assertEqual("", data.get("body")[3].get("genre"))
 
     def test_get_all_users_specified_columns_abilities(self):
         with self._app.test_client() as c:
