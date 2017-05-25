@@ -150,7 +150,7 @@ class AccountModel(BaseModel):
         return {str(key): str(value) for key, value in zip(self.account_columns.keys(), record)}
 
     def update_user_with(self, id_, **kwargs):
-        query = self._db.User.update().where(self._db.User.c.id_==id_)
+        query = self._db.User.update().where(self._db.User.c.id_ == id_)
 
         if kwargs.get("email"):
             query = query.values(email=kwargs.get("email"))
@@ -162,7 +162,7 @@ class AccountModel(BaseModel):
         query.values(updatedAt=datetime.now()).execute()
 
     def update_profile_with(self, id_, **kwargs):
-        query = self._db.Profile.update().where(self._db.Profile.c.userId==id_)
+        query = self._db.Profile.update().where(self._db.Profile.c.userId == id_)
 
         params = {"updatedAt": datetime.now()}
         for column in self._db.Profile.c.keys():

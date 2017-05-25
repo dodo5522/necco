@@ -33,7 +33,6 @@ class ModelSwitcher(object):
         return cls._model is not None
 
 
-
 class AbilityApi(MethodView, ModelSwitcher):
     """ for route of /api/abilities """
 

@@ -17,14 +17,10 @@
 
 from mymock import AbstractAccessorToTestData
 import unittest
-from unittest.mock import patch
 from flask import Flask
 from necco.api import AbilityApi
 from necco.models import SqliteDb, AbilityModel
 import json
-import sys
-# import subprocess as sub
-# import tempfile
 
 
 class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
@@ -129,7 +125,7 @@ class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
             with c.session_transaction() as sess:
                 sess["user_id"] = 2
 
-            ret = c.get("/api/abilities/{}".format(1)) # 山田太郎のデータを取得
+            ret = c.get("/api/abilities/{}".format(1))  # 山田太郎のデータを取得
             data = json.loads(ret.data.decode("utf-8"))
 
             self.assertEqual(200, ret.status_code)
