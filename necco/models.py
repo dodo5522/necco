@@ -72,10 +72,10 @@ class BaseModel(object):
     def __init__(self, db=None):
         self._db = db if db else MySqlDb()
 
-    def get_columns(self):
+    def get_all_column(self):
         raise NotImplementedError
 
-    def yield_record(self):
+    def yield_record(self, columns=None):
         raise NotImplementedError
 
 
@@ -96,7 +96,7 @@ class AccountModel(BaseModel):
         self.account_columns["faxNumber"] = self._db.Profile.c.faxNumber
         self.account_columns["profile"] = self._db.Profile.c.profile
 
-    def get_columns(self):
+    def get_all_column(self):
         return self.account_columns.keys()
 
     def get_hashed_password(self, user_id):
@@ -184,18 +184,19 @@ class AccountModel(BaseModel):
 class AbilityModel(BaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(db=kwargs.get("db"))
-        self.ability_columns = [
-            (self._db.Profile.c.lastName, "lastName"),
-            (self._db.Profile.c.firstName, "firstName"),
-            (self._db.Profile.c.lastKanaName, "lastKanaName"),
-            (self._db.Profile.c.firstKanaName, "firstKanaName"),
-            (self._db.Ability.c.detail, "detail"),
-        ]
+        self.ability_columns = {
+            "lastName": self._db.Profile.c.lastName,
+            "firstName": self._db.Profile.c.firstName,
+            "lastKanaName": self._db.Profile.c.lastKanaName,
+            "firstKanaName": self._db.Profile.c.firstKanaName,
+            "genre": self._db.Ability.c.genre,
+            "detail": self._db.Ability.c.detail,
+        }
 
-    def get_columns(self):
-        return [c[1] for c in self.ability_columns]
+    def get_all_column(self):
+        return self.ability_columns.keys()
 
-    def yield_record(self):
+    def yield_record(self, columns=None):
         """ Generator function which returns ability records with below query.
 
             SELECT Profile.lastName, Profile.firstName, ... FROM User
@@ -204,17 +205,26 @@ class AbilityModel(BaseModel):
                 INNER JOIN Ability ON UsersAbility.abilityId = Ability.id_;
         """
 
+        if columns:
+            columns = [col for col in columns if col in self.ability_columns.keys()]
+            db_columns = [self.ability_columns.get(col) for col in columns]
+        else:
+            columns = self.ability_columns.keys()
+            db_columns = self.ability_columns.values()
+
         joined_query = self._db.User.join(self._db.Profile, self._db.User.c.id_ == self._db.Profile.c.userId)
         joined_query = joined_query.join(self._db.UsersAbility, self._db.User.c.id_ == self._db.UsersAbility.c.userId)
         joined_query = joined_query.join(self._db.Ability, self._db.UsersAbility.c.abilityId == self._db.Ability.c.id_)
         joined_query = joined_query.select()
-        joined_query = joined_query.with_only_columns([c[0] for c in self.ability_columns]).execute()
+        joined_query = joined_query.with_only_columns(db_columns).execute()
 
         while True:
             record = joined_query.fetchone()
+
             if not record:
                 break
-            yield record
+
+            yield {columns[i]: r for i, r in enumerate(record)}
 
 
 class RequestModel(BaseModel):
@@ -241,10 +251,10 @@ class RequestModel(BaseModel):
         res = joined_query.execute()
         return [_ for _ in res][0][0]
 
-    def get_columns(self):
+    def get_all_column(self):
         return [c[1] for c in self.request_columns]
 
-    def yield_record(self):
+    def yield_record(self, columns=None):
         """ Generator function which returns request records with below query.
 
             SELECT Profile.lastName, Profile.firstName, Profile.lastKanaName, Profile.firstKanaName, Request.detail FROM User
@@ -273,18 +283,18 @@ class PrefectureModel(BaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(db=kwargs.get("db"))
 
-    def get_columns(self):
+    def get_all_column(self):
         return [
             self._db.Prefecture.c.id_,
             self._db.Prefecture.c.name_
         ]
 
-    def yield_record(self):
+    def yield_record(self, columns=None):
         """ Generator function which returns prefectures with below query.
 
             SELECT Prefecture.id_, Prefecture.name_ FROM Prefecture;
         """
-        query = self._db.Prefecture.select().with_only_columns(self.get_columns())
+        query = self._db.Prefecture.select().with_only_columns(self.get_all_column())
 
         for record in query.execute():
             yield record

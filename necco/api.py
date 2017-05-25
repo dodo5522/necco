@@ -43,9 +43,16 @@ class AbilityApi(MethodView, ModelSwitcher):
             self.set_model(AbilityModel())
 
     def get(self, user_id):
+        if user_id is None:
+            pass
+        elif user_id is 0:
+            user_id = session["user_id"]
+        else:
+            pass
+
         try:
-            columns = request.args if request.args else self._model.get_columns()
-            abilities = [{columns[i]: r[i] for i in range(len(columns))} for r in self._model.yield_record()]
+            columns = [k for k in request.args.keys()] if request.args else None
+            abilities = [r for r in self._model.yield_record(columns)]
         except:
             columns = abilities = []
 
@@ -77,7 +84,7 @@ class RequestApi(MethodView, ModelSwitcher):
 
     def get(self):
         try:
-            columns = request.args if request.args else self._model.get_columns()
+            columns = request.args if request.args else self._model.get_all_column()
             requests = [{columns[i]: r[i] for i in range(len(columns))} for r in self._model.yield_record()]
         except:
             columns = requests = []
