@@ -194,7 +194,7 @@ class AbilityModel(BaseModel):
         }
 
     def get_all_column(self):
-        return self.ability_columns.keys()
+        return [k for k in self.ability_columns.keys()]
 
     def yield_record(self, columns=None):
         """ Generator function which returns ability records with below query.

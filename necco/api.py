@@ -51,7 +51,7 @@ class AbilityApi(MethodView, ModelSwitcher):
             pass
 
         try:
-            columns = [k for k in request.args.keys()] if request.args else None
+            columns = [k for k in request.args.keys()] if request.args else self._model.get_all_column()
             abilities = [r for r in self._model.yield_record(columns)]
         except:
             columns = abilities = []
