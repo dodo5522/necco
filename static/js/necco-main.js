@@ -5,24 +5,6 @@ $(function() {
     showContent("#contentPassbook");
   });
 
-  $("#navbarItemSettings").on("click", function() {
-    hideContent();
-    activateNavbarItem("#navbarItemSettings");
-
-    $.ajax({
-      type: "GET",
-      url: "/api/account",
-      dataType: "json"
-    }).done(function(data, text, jqxhr){
-      for(var key in data){
-        $("#" + key).val(data[key]);
-      }
-      showContent("#contentSettings");
-    }).fail(function(jqxhr, text, error){
-      showContent("#contentSettings");
-    });
-  });
-
   $("#navbarItemAbilities").on("click", function() {
     hideContent();
 
