@@ -67,10 +67,10 @@ $(function() {
   });
 
   $("#buttonAddAbility").on("click", function(){
-    swal("できること追加")
+    swal("ごめんなさい、できることリスト追加に対応していません。")
   });
 
   $("#buttonAddRequest").on("click", function(){
-    swal("してほしいこと追加")
+    swal("ごめんなさい、してほしいことリスト追加に対応していません。")
   });
 });
