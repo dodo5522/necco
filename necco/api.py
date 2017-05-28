@@ -42,16 +42,17 @@ class AbilityApi(MethodView, ModelSwitcher):
             self.set_model(AbilityModel())
 
     def get(self, user_id):
-        if user_id is None:
-            pass
-        elif user_id is 0:
-            user_id = session["user_id"]
-        else:
-            pass
+        user_ids = []
+
+        # 0 indicates myself.
+        if user_id is 0:
+            user_ids.append(session["user_id"])
+        elif user_id:
+            user_ids.append(user_id)
 
         try:
             columns = [k for k in request.args.keys()] if request.args else self._model.get_all_column()
-            abilities = [r for r in self._model.yield_record(columns)]
+            abilities = [r for r in self._model.yield_record(user_ids, columns)]
         except:
             columns = abilities = []
 

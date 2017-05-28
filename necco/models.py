@@ -196,34 +196,38 @@ class AbilityModel(BaseModel):
     def get_all_column(self):
         return [k for k in self.ability_columns.keys()]
 
-    def yield_record(self, columns=None):
-        """ Generator function which returns ability records with below query.
+    def yield_record(self, user_ids=[], columns=None):
+        """ Generator function which returns ability records with the specified users and below query.
 
             SELECT Profile.lastName, Profile.firstName, ... FROM User
                 INNER JOIN Profile ON Profile.userId = User.id_
                 INNER JOIN UsersAbility ON User.id_ = UsersAbility.userId
                 INNER JOIN Ability ON UsersAbility.abilityId = Ability.id_;
         """
+        filter_ = None
+        if user_ids:
+            filter_ = self._db.User.c.id_ == user_ids[0]
+            for user_id in user_ids[1:]:
+                filter_ |= self._db.User.c.id_ == user_id
 
         if columns:
             columns = [col for col in columns if col in self.ability_columns.keys()]
-            db_columns = [self.ability_columns.get(col) for col in columns]
         else:
-            columns = self.ability_columns.keys()
-            db_columns = self.ability_columns.values()
+            columns = [col for col in self.ability_columns.keys()]
+        db_columns = [self.ability_columns.get(col) for col in columns]
 
         joined_query = self._db.User.join(self._db.Profile, self._db.User.c.id_ == self._db.Profile.c.userId)
         joined_query = joined_query.join(self._db.UsersAbility, self._db.User.c.id_ == self._db.UsersAbility.c.userId)
         joined_query = joined_query.join(self._db.Ability, self._db.UsersAbility.c.abilityId == self._db.Ability.c.id_)
-        joined_query = joined_query.select()
-        joined_query = joined_query.with_only_columns(db_columns).execute()
+        selected_query = joined_query.select()
 
-        while True:
-            record = joined_query.fetchone()
+        # if filter_:  # not operated... why?
+        if filter_ is not None:
+            selected_query = selected_query.where(filter_)
 
-            if not record:
-                break
+        executed = selected_query.with_only_columns(db_columns).execute()
 
+        for record in executed.fetchall():
             yield {columns[i]: r for i, r in enumerate(record)}
 
 
