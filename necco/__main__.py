@@ -55,7 +55,11 @@ def set_url_rules(app):
     app.add_url_rule(rule="/login", view_func=LoginView.as_view("login"))
     app.add_url_rule(rule="/logout", view_func=LogoutView.as_view("logout"))
     app.add_url_rule(rule="/", view_func=MainView.as_view("index"))
-    app.add_url_rule(rule="/api/abilities", view_func=AbilityApi.as_view("abilities"))
+
+    abilities_view = AbilityApi.as_view("abilities")
+    app.add_url_rule(rule="/api/abilities", view_func=abilities_view, methods=["GET", ], defaults={"user_id": None}) # get all users' abilities.
+    app.add_url_rule(rule="/api/abilities/<int:user_id>", view_func=abilities_view, methods=["GET", "PUT", "POST", "DELETE"]) # get the specified user's ability.
+
     app.add_url_rule(rule="/api/requests", view_func=RequestApi.as_view("requests"))
     app.add_url_rule(rule="/api/prefs", view_func=PrefectureApi.as_view("prefs"))
 
