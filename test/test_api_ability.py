@@ -123,9 +123,9 @@ class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
     def test_get_a_users_abilities(self):
         with self._app.test_client() as c:
             with c.session_transaction() as sess:
-                sess["user_id"] = 2
+                sess["user_id"] = 2  # 山田次郎でログイン
 
-            ret = c.get("/api/abilities/{}".format(1))  # 山田太郎のデータを取得
+            ret = c.get("/api/abilities/{}?genre&detail".format(1))  # 山田太郎のデータを取得
             data = json.loads(ret.data.decode("utf-8"))
 
             self.assertEqual(200, ret.status_code)
@@ -134,7 +134,7 @@ class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertIn("body", data)
 
             self.assertEqual(3, data.get("length"))
-            self.assertEqual(1, len(data.get("columns")))
+            self.assertEqual(2, len(data.get("columns")))
             self.assertIn("genre", data.get("columns"))
             self.assertIn("detail", data.get("columns"))
             self.assertEqual("", data.get("body")[0].get("genre"))
@@ -151,7 +151,6 @@ class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
 
             ret = c.get("/api/abilities/{}".format(0xffffffffffffffffffffffffffffffff))
             data = json.loads(ret.data.decode("utf-8"))
-
             self.assertEqual(200, ret.status_code)
             self.assertIn("length", data)
             self.assertIn("columns", data)
