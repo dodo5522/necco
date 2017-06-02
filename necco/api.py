@@ -82,10 +82,18 @@ class RequestApi(MethodView, ModelSwitcher):
         if not self.is_model_set():
             self.set_model(RequestModel())
 
-    def get(self):
+    def get(self, user_id):
+        user_ids = []
+
+        # 0 indicates myself.
+        if user_id is 0:
+            user_ids.append(session["user_id"])
+        elif user_id:
+            user_ids.append(user_id)
+
         try:
-            columns = request.args if request.args else self._model.get_all_column()
-            requests = [{columns[i]: r[i] for i in range(len(columns))} for r in self._model.yield_record()]
+            columns = [k for k in request.args.keys()] if request.args else self._model.get_all_column()
+            requests = [r for r in self._model.yield_record(user_ids, columns)]
         except:
             columns = requests = []
 

@@ -16,7 +16,6 @@
 #   limitations under the License.
 
 from flask import Flask, session, request, redirect
-from jinja2 import FileSystemLoader
 from necco.config import ServerConfiguration
 from necco.views import LoginView, LogoutView, MainView, DebugView
 from necco.api import AbilityApi, RequestApi, PrefectureApi, AccountApi
@@ -57,10 +56,13 @@ def set_url_rules(app):
     app.add_url_rule(rule="/", view_func=MainView.as_view("index"))
 
     abilities_view = AbilityApi.as_view("abilities")
-    app.add_url_rule(rule="/api/abilities", view_func=abilities_view, methods=["GET", ], defaults={"user_id": None}) # get all users' abilities.
-    app.add_url_rule(rule="/api/abilities/<int:user_id>", view_func=abilities_view, methods=["GET", "PUT", "POST", "DELETE"]) # get the specified user's ability.
+    app.add_url_rule(rule="/api/abilities", view_func=abilities_view, methods=["GET", ], defaults={"user_id": None})  # get all users' abilities.
+    app.add_url_rule(rule="/api/abilities/<int:user_id>", view_func=abilities_view, methods=["GET", "PUT", "POST", "DELETE"])  # get the specified user's ability.
 
-    app.add_url_rule(rule="/api/requests", view_func=RequestApi.as_view("requests"))
+    requests_view = RequestApi.as_view("requests")
+    app.add_url_rule(rule="/api/requests", view_func=requests_view, methods=["GET", ], defaults={"user_id": None})  # get all users' requests.
+    app.add_url_rule(rule="/api/requests/<int:user_id>", view_func=requests_view, methods=["GET", "PUT", "POST", "DELETE"])  # get the specified user's ability.
+
     app.add_url_rule(rule="/api/prefs", view_func=PrefectureApi.as_view("prefs"))
 
     account_view = AccountApi.as_view("account")

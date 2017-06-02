@@ -235,13 +235,14 @@ class AbilityModel(BaseModel):
 class RequestModel(BaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(db=kwargs.get("db"))
-        self.request_columns = [
-            (self._db.Profile.c.lastName, "lastName"),
-            (self._db.Profile.c.firstName, "firstName"),
-            (self._db.Profile.c.lastKanaName, "lastKanaName"),
-            (self._db.Profile.c.firstKanaName, "firstKanaName"),
-            (self._db.Request.c.detail, "detail"),
-        ]
+        self.request_columns = {
+            "lastName": self._db.Profile.c.lastName,
+            "firstName": self._db.Profile.c.firstName,
+            "lastKanaName": self._db.Profile.c.lastKanaName,
+            "firstKanaName": self._db.Profile.c.firstKanaName,
+            "genre": self._db.Request.c.genre,
+            "detail": self._db.Request.c.detail,
+        }
 
     def _get_request_count(self):
         """ Get the number of requests.
@@ -257,9 +258,9 @@ class RequestModel(BaseModel):
         return [_ for _ in res][0][0]
 
     def get_all_column(self):
-        return [c[1] for c in self.request_columns]
+        return [k for k in self.request_columns.keys()]
 
-    def yield_record(self, columns=None):
+    def yield_record(self, user_ids=[], columns=None):
         """ Generator function which returns request records with below query.
 
             SELECT Profile.lastName, Profile.firstName, Profile.lastKanaName, Profile.firstKanaName, Request.detail FROM User
@@ -267,21 +268,30 @@ class RequestModel(BaseModel):
                 INNER JOIN UsersRequest ON User.id_ = UsersRequest.userId
                 INNER JOIN Request ON UsersRequest.requestId = Request.id_;
         """
+        filter_ = None
+        if user_ids:
+            filter_ = self._db.User.c.id_ == user_ids[0]
+            for user_id in user_ids[1:]:
+                filter_ |= self._db.User.c.id_ == user_id
 
-        joined_query = self._db.User.join(
-            self._db.Profile, self._db.User.c.id_ == self._db.Profile.c.userId)
-        joined_query = joined_query.join(
-            self._db.UsersRequest, self._db.User.c.id_ == self._db.UsersRequest.c.userId)
-        joined_query = joined_query.join(
-            self._db.Request, self._db.UsersRequest.c.requestId == self._db.Request.c.id_)
-        joined_query = joined_query.select()
-        joined_query = joined_query.with_only_columns([c[0] for c in self.request_columns]).execute()
+        if columns:
+            columns = [col for col in columns if col in self.request_columns.keys()]
+        else:
+            columns = [col for col in self.request_columns.keys()]
+        db_columns = [self.request_columns.get(col) for col in columns]
 
-        while True:
-            record = joined_query.fetchone()
-            if not record:
-                break
-            yield record
+        joined_query = self._db.User.join(self._db.Profile, self._db.User.c.id_ == self._db.Profile.c.userId)
+        joined_query = joined_query.join(self._db.UsersRequest, self._db.User.c.id_ == self._db.UsersRequest.c.userId)
+        joined_query = joined_query.join(self._db.Request, self._db.UsersRequest.c.requestId == self._db.Request.c.id_)
+        selected_query = joined_query.select()
+
+        if filter_ is not None:
+            selected_query = selected_query.where(filter_)
+
+        executed = selected_query.with_only_columns(db_columns).execute()
+
+        for record in executed.fetchall():
+            yield {columns[i]: r for i, r in enumerate(record)}
 
 
 class PrefectureModel(BaseModel):
