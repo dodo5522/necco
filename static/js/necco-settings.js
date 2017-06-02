@@ -32,6 +32,29 @@ $(function() {
         liAbility.appendTo(ulAbility);
       }
     }).fail(function(jqxhr, text, error){
+      swal({
+        title:"　",
+        text:"あなたのできることリストを取得できませんでした",
+        confirmButtonText: "しぶしぶ了解！",
+        type:"error"});
+    });
+
+    $.ajax({
+      type: "GET",
+      url: "/api/requests/0", // myself
+      dataType: "json",
+    }).done(function(data, text, jqxhr){
+      var ulAbility = $("#listRequest");
+      ulAbility.empty();
+      for(var i = 0; i < data.length; i++){
+        var liAbility = $("<li>");
+        liAbility.text(data.body[i].detail);
+        liAbility.attr("id", "itemsListRequest" + i);
+        liAbility.addClass("itemsListRequest");
+        liAbility.addClass("list-group-item");
+        liAbility.appendTo(ulAbility);
+      }
+    }).fail(function(jqxhr, text, error){
     });
   });
 

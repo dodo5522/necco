@@ -174,7 +174,7 @@ class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
             with c.session_transaction() as sess:
                 sess["user_id"] = test_user_id
 
-            ret = c.get("/api/abilities/{}".format(test_user_id))
+            c.put("/api/abilities")
 
     def test_put_to_update_a_users_abilities(self):
         pass
