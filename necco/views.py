@@ -16,20 +16,18 @@
 #   limitations under the License.
 
 import json
-from necco.config import ServerConfiguration
+from necco.config import config
 from necco.auth import PasswordAuthentication
 from flask import render_template, session, request, redirect
 from flask.views import View, MethodView
 
 
-_config = ServerConfiguration()
-
-
 class LoginView(MethodView):
+
     def get(self):
         return render_template(
             "login.html",
-            title=_config.TITLE)
+            title=config.TITLE)
 
     def post(self):
         auth = PasswordAuthentication(
@@ -78,7 +76,7 @@ class MainView(View):
 
         return render_template(
             "index.html",
-            title=_config.TITLE,
+            title=config.TITLE,
             username=session["user_id"],
             records=records)
 

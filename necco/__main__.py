@@ -16,15 +16,13 @@
 #   limitations under the License.
 
 from flask import Flask, session, request, redirect
-from necco.config import ServerConfiguration
+from necco.config import config
 from necco.views import LoginView, LogoutView, MainView, DebugView
 from necco.api import AbilityApi, RequestApi, PrefectureApi, AccountApi
 import os
 
 
 def create_application():
-    config = ServerConfiguration()
-
     app = Flask(
         config.TITLE,
         template_folder=config.DOCROOT,
