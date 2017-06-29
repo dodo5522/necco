@@ -1,4 +1,4 @@
-$(function() {
+$(document).ready(function(){
   $("#navbarItemPassbook").on("click", function() {
     hideContent();
     activateNavbarItem("#navbarItemPassbook");
@@ -24,14 +24,14 @@ $(function() {
       var head = $("<thead>").appendTo(table);
       var tr = $("<tr>").appendTo(head);
 
-      for(var i = 0; i <= columns.length; i++) {
+      for(var i = 0; i < columns.length; i++) {
         $("<th>").text(columns[i]).appendTo(tr)
       }
 
-      for(var record of records) {
+      for(var i = 0; i < records.length; i++) {
         var tr = $("<tr>").appendTo(body);
-        for(var i = 0; i <= columns.length; i++) {
-          $("<td>").text(record[columns[i]]).appendTo(tr);
+        for(var j = 0; j <= columns.length; j++) {
+          $("<td>").text(records[i][columns[j]]).appendTo(tr);
         }
       }
 
@@ -60,14 +60,14 @@ $(function() {
       var head = $("<thead>").appendTo(table);
       var tr = $("<tr>").appendTo(head);
 
-      for(var i = 0; i <= columns.length; i++) {
+      for(var i = 0; i < columns.length; i++) {
         $("<th>").text(columns[i]).appendTo(tr)
       }
 
-      for(var record of records) {
+      for(var i = 0; i < records.length; i++) {
         var tr = $("<tr>").appendTo(body);
-        for(var i = 0; i <= columns.length; i++) {
-          $("<td>").text(record[columns[i]]).appendTo(tr);
+        for(var j = 0; j <= columns.length; j++) {
+          $("<td>").text(records[i][columns[j]]).appendTo(tr);
         }
       }
 
@@ -77,9 +77,7 @@ $(function() {
     });
   });
 
-  $(window).on("load", function() {
-    hideContent();
-    $("#navbarItemPassbook").addClass("active");
-    showContent("#contentPassbook");
-  });
+  hideContent();
+  activateNavbarItem("#navbarItemPassbook");
+  showContent("#contentPassbook");
 });
