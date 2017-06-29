@@ -47,15 +47,18 @@ class AbstractAuthentication(object):
 
 class PasswordAuthentication(AbstractAuthentication):
     def __init__(self, *args, **kwargs):
+        config = kwargs.pop("config")
+        self._account = AccountModel(config)
+
         super().__init__(*args, **kwargs)
 
     def _do_authentication(self, email, password):
         if not check_password_hash(
-                AccountModel().get_hashed_password(self._get_user_id(email)),
+                self._account.get_hashed_password(self._get_user_id(email)),
                 password):
             return False
 
         return True
 
     def _get_user_id(self, email):
-        return AccountModel().get_id(email)
+        return self._account.get_id(email)

@@ -17,13 +17,9 @@
 
 from collections import OrderedDict
 from datetime import datetime
-from necco.config import ServerConfiguration
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash
-
-
-_config = ServerConfiguration()
 
 
 class SqliteDb(object):
@@ -39,15 +35,7 @@ class SqliteDb(object):
 class MySqlDb(object):
     __instance = None
 
-    def __new__(
-            cls,
-            user=_config.MYSQL_USER,
-            password=_config.MYSQL_PASSWORD,
-            server=_config.MYSQL_SERVER,
-            port=_config.MYSQL_PORT,
-            db=_config.MYSQL_DB,
-            url=None):
-
+    def __new__(cls, user, password, server, port, db_name, url=None):
         if cls.__instance is None:
             cls.__instance = object.__new__(cls)
 
@@ -57,7 +45,7 @@ class MySqlDb(object):
                     PASSWORD=password,
                     SERVER=server,
                     PORT=port,
-                    DB=db),
+                    DB=db_name),
                 pool_recycle=14400) if url is None else create_engine(url)
 
             cls.__db_meta = MetaData(bind=engine)
@@ -70,8 +58,13 @@ class MySqlDb(object):
 
 
 class BaseModel(object):
-    def __init__(self, db=None):
-        self._db = db if db else MySqlDb()
+    def __init__(self, config, db=None, **kwargs):
+        self._db = db if db else MySqlDb(
+            config.SQL_USER,
+            config.SQL_PASSWORD,
+            config.SQL_SERVER,
+            config.SQL_PORT,
+            config.SQL_DB)
 
     def get_all_column(self):
         raise NotImplementedError
@@ -81,8 +74,8 @@ class BaseModel(object):
 
 
 class AccountModel(BaseModel):
-    def __init__(self, *args, **kwargs):
-        super().__init__(db=kwargs.get("db"))
+    def __init__(self, config, **kwargs):
+        super().__init__(config, db=kwargs.get("db"))
         self.account_columns = OrderedDict()
         self.account_columns["lastName"] = self._db.Profile.c.lastName
         self.account_columns["firstName"] = self._db.Profile.c.firstName
@@ -183,8 +176,8 @@ class AccountModel(BaseModel):
 
 
 class AbilityModel(BaseModel):
-    def __init__(self, *args, **kwargs):
-        super().__init__(db=kwargs.get("db"))
+    def __init__(self, config, **kwargs):
+        super().__init__(config, db=kwargs.get("db"))
         self.ability_columns = {
             "lastName": self._db.Profile.c.lastName,
             "firstName": self._db.Profile.c.firstName,
@@ -233,8 +226,8 @@ class AbilityModel(BaseModel):
 
 
 class RequestModel(BaseModel):
-    def __init__(self, *args, **kwargs):
-        super().__init__(db=kwargs.get("db"))
+    def __init__(self, config, **kwargs):
+        super().__init__(config, db=kwargs.get("db"))
         self.request_columns = {
             "lastName": self._db.Profile.c.lastName,
             "firstName": self._db.Profile.c.firstName,
@@ -295,8 +288,8 @@ class RequestModel(BaseModel):
 
 
 class PrefectureModel(BaseModel):
-    def __init__(self, *args, **kwargs):
-        super().__init__(db=kwargs.get("db"))
+    def __init__(self, config, **kwargs):
+        super().__init__(config, db=kwargs.get("db"))
 
     def get_all_column(self):
         return [

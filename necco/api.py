@@ -37,9 +37,10 @@ class AbilityApi(MethodView, ModelSwitcher):
     """ for route of /api/abilities """
 
     def __init__(self, *args, **kwargs):
+        config = kwargs.pop("config")
         super().__init__(*args, **kwargs)
         if not self.is_model_set():
-            self.set_model(AbilityModel())
+            self.set_model(AbilityModel(config))
 
     def get(self, user_id):
         user_ids = []
@@ -78,9 +79,10 @@ class RequestApi(MethodView, ModelSwitcher):
     """ for route of /api/requests """
 
     def __init__(self, *args, **kwargs):
+        config = kwargs.pop("config")
         super(RequestApi, self).__init__(*args, **kwargs)
         if not self.is_model_set():
-            self.set_model(RequestModel())
+            self.set_model(RequestModel(config))
 
     def get(self, user_id):
         user_ids = []
@@ -113,9 +115,10 @@ class PrefectureApi(MethodView, ModelSwitcher):
     """ for route of /api/prefs """
 
     def __init__(self, *args, **kwargs):
+        config = kwargs.pop("config")
         super(PrefectureApi, self).__init__(*args, **kwargs)
         if not self.is_model_set():
-            self.set_model(PrefectureModel())
+            self.set_model(PrefectureModel(config))
 
     def get(self):
         columns = ["id", "name"]
@@ -133,9 +136,10 @@ class AccountApi(MethodView, ModelSwitcher):
     """ for route of "/api/account" """
 
     def __init__(self, *args, **kwargs):
+        config = kwargs.pop("config")
         super().__init__(*args, **kwargs)
         if not self.is_model_set():
-            self.set_model(AccountModel())
+            self.set_model(AccountModel(config))
 
     def post(self):
         """ Create new user account. """

@@ -26,7 +26,7 @@ class ServerConfiguration(object):
             "DOCROOT": "/var/tmp/necco",
             "SECRET_KEY": "necco_temporary_key",
         },
-        "MYSQL": {
+        "SQL": {
             "DB": "necco",
             "PORT": "3306",
             "SERVER": "localhost",
@@ -35,7 +35,7 @@ class ServerConfiguration(object):
         },
     }
 
-    def __init__(self, file_path="/etc/necco/necco.ini"):
+    def __init__(self, file_path):
         """ Set configuration based on the specified file.
 
         returns:
@@ -71,8 +71,8 @@ class ServerConfiguration(object):
         self.TITLE = parser["GENERAL"]["TITLE"]
         self.DOCROOT = parser["GENERAL"]["DOCROOT"]
         self.SECRET_KEY = parser["GENERAL"]["SECRET_KEY"]
-        self.MYSQL_DB = parser["MYSQL"]["DB"]
-        self.MYSQL_PORT = int(parser["MYSQL"]["PORT"])
-        self.MYSQL_SERVER = parser["MYSQL"]["SERVER"]
-        self.MYSQL_USER = parser["MYSQL"]["USER"]
-        self.MYSQL_PASSWORD = parser["MYSQL"]["PASSWORD"]
+        self.SQL_DB = parser["SQL"]["DB"]
+        self.SQL_PORT = int(parser["SQL"]["PORT"])
+        self.SQL_SERVER = parser["SQL"]["SERVER"]
+        self.SQL_USER = parser["SQL"]["USER"]
+        self.SQL_PASSWORD = parser["SQL"]["PASSWORD"]
