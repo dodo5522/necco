@@ -18,7 +18,6 @@
 import json
 from flask import session, request
 from flask.views import MethodView
-from necco.config import config
 from necco.models import AccountModel, AbilityModel, RequestModel, PrefectureModel
 
 
@@ -38,6 +37,7 @@ class AbilityApi(MethodView, ModelSwitcher):
     """ for route of /api/abilities """
 
     def __init__(self, *args, **kwargs):
+        config = kwargs.pop("config")
         super().__init__(*args, **kwargs)
         if not self.is_model_set():
             self.set_model(AbilityModel(config))
@@ -79,6 +79,7 @@ class RequestApi(MethodView, ModelSwitcher):
     """ for route of /api/requests """
 
     def __init__(self, *args, **kwargs):
+        config = kwargs.pop("config")
         super(RequestApi, self).__init__(*args, **kwargs)
         if not self.is_model_set():
             self.set_model(RequestModel(config))
@@ -114,6 +115,7 @@ class PrefectureApi(MethodView, ModelSwitcher):
     """ for route of /api/prefs """
 
     def __init__(self, *args, **kwargs):
+        config = kwargs.pop("config")
         super(PrefectureApi, self).__init__(*args, **kwargs)
         if not self.is_model_set():
             self.set_model(PrefectureModel(config))
@@ -134,6 +136,7 @@ class AccountApi(MethodView, ModelSwitcher):
     """ for route of "/api/account" """
 
     def __init__(self, *args, **kwargs):
+        config = kwargs.pop("config")
         super().__init__(*args, **kwargs)
         if not self.is_model_set():
             self.set_model(AccountModel(config))

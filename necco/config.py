@@ -15,24 +15,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import argparse
 import configparser
 import os
-import sys
-
-
-def parse_args(args=sys.argv[1:]):
-    parser = argparse.ArgumentParser(description="for necco server application")
-
-    parser.add_argument(
-        "-c", "--path-config",
-        action="store",
-        nargs="?",
-        default="/etc/necco/necco.ini",
-        type=str,
-        help="path to necco configuration file")
-
-    return parser.parse_args(args)
 
 
 class ServerConfiguration(object):
@@ -92,6 +76,3 @@ class ServerConfiguration(object):
         self.SQL_SERVER = parser["SQL"]["SERVER"]
         self.SQL_USER = parser["SQL"]["USER"]
         self.SQL_PASSWORD = parser["SQL"]["PASSWORD"]
-
-
-config = ServerConfiguration(parse_args().path_config)

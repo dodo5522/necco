@@ -15,14 +15,32 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import argparse
 from flask import Flask, session, request, redirect
-from necco.config import config
+from necco.config import ServerConfiguration
 from necco.views import LoginView, LogoutView, MainView, DebugView
 from necco.api import AbilityApi, RequestApi, PrefectureApi, AccountApi
 import os
+import sys
 
 
-def create_application():
+def parse_args(args=sys.argv[1:]):
+    parser = argparse.ArgumentParser(description="for necco server application")
+
+    parser.add_argument(
+        "-c", "--path-config",
+        action="store",
+        nargs="?",
+        default="/etc/necco/necco.ini",
+        type=str,
+        help="path to necco configuration file")
+
+    return parser.parse_args(args)
+
+
+def create_application(path_config):
+    config = ServerConfiguration(path_config)
+
     app = Flask(
         config.TITLE,
         template_folder=config.DOCROOT,
@@ -45,36 +63,34 @@ def create_application():
 
     app.before_request(before_request)
 
-    return app
+    def set_url_rules(flask_app):
+        flask_app.add_url_rule(rule="/login", view_func=LoginView.as_view("login", config=config))
+        flask_app.add_url_rule(rule="/logout", view_func=LogoutView.as_view("logout"))
+        flask_app.add_url_rule(rule="/", view_func=MainView.as_view("index", config=config))
+
+        abilities_view = AbilityApi.as_view("abilities", config=config)
+        flask_app.add_url_rule(rule="/api/abilities", view_func=abilities_view, methods=["GET", ], defaults={"user_id": None})
+        flask_app.add_url_rule(rule="/api/abilities/<int:user_id>", view_func=abilities_view, methods=["GET", "PUT", "POST", "DELETE"])
+
+        requests_view = RequestApi.as_view("requests", config=config)
+        flask_app.add_url_rule(rule="/api/requests", view_func=requests_view, methods=["GET", ], defaults={"user_id": None})
+        flask_app.add_url_rule(rule="/api/requests/<int:user_id>", view_func=requests_view, methods=["GET", "PUT", "POST", "DELETE"])
+
+        flask_app.add_url_rule(rule="/api/prefs", view_func=PrefectureApi.as_view("prefs"))
+
+        account_view = AccountApi.as_view("account", config=config)
+        flask_app.add_url_rule(rule="/api/account", view_func=account_view, methods=["POST", ])
+        flask_app.add_url_rule(rule="/api/account", view_func=account_view, methods=["GET", "PUT", "DELETE"], defaults={"user_id": None})
+        flask_app.add_url_rule(rule="/api/account/<int:user_id>", view_func=account_view, methods=["GET", "PUT", "DELETE"])
+
+        return flask_app
+
+    return set_url_rules(app)
 
 
-def set_url_rules(app):
-    app.add_url_rule(rule="/login", view_func=LoginView.as_view("login"))
-    app.add_url_rule(rule="/logout", view_func=LogoutView.as_view("logout"))
-    app.add_url_rule(rule="/", view_func=MainView.as_view("index"))
+def create_application_for_debug(path_config):
+    flask_app = create_application(path_config)
 
-    abilities_view = AbilityApi.as_view("abilities")
-    app.add_url_rule(rule="/api/abilities", view_func=abilities_view, methods=["GET", ], defaults={"user_id": None})  # get all users' abilities.
-    app.add_url_rule(rule="/api/abilities/<int:user_id>", view_func=abilities_view, methods=["GET", "PUT", "POST", "DELETE"])  # get the specified user's ability.
-
-    requests_view = RequestApi.as_view("requests")
-    app.add_url_rule(rule="/api/requests", view_func=requests_view, methods=["GET", ], defaults={"user_id": None})  # get all users' requests.
-    app.add_url_rule(rule="/api/requests/<int:user_id>", view_func=requests_view, methods=["GET", "PUT", "POST", "DELETE"])  # get the specified user's ability.
-
-    app.add_url_rule(rule="/api/prefs", view_func=PrefectureApi.as_view("prefs"))
-
-    account_view = AccountApi.as_view("account")
-    app.add_url_rule(rule="/api/account", view_func=account_view, methods=["POST", ])
-    app.add_url_rule(rule="/api/account", view_func=account_view, methods=["GET", "PUT", "DELETE"], defaults={"user_id": None})
-    app.add_url_rule(rule="/api/account/<int:user_id>", view_func=account_view, methods=["GET", "PUT", "DELETE"])
-
-    return app
-
-
-app = set_url_rules(create_application())
-
-
-def main(app=app):
     def after_request(r):
         """
         Add headers to both force latest IE rendering engine or Chrome Frame,
@@ -86,12 +102,17 @@ def main(app=app):
         r.headers['Cache-Control'] = 'public, max-age=0'
         return r
 
-    app.after_request(after_request)
-    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+    flask_app.after_request(after_request)
+    flask_app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
-    app.debug = True
-    app.add_url_rule(rule="/temp", view_func=DebugView.as_view("temp"))
+    flask_app.debug = True
+    flask_app.add_url_rule(rule="/temp", view_func=DebugView.as_view("temp"))
 
+    return flask_app
+
+
+def main():
+    app = create_application_for_debug(parse_args().path_config)
     app.run(host="127.0.0.1", port=8000)
 
 
