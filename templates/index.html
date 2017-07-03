@@ -1,26 +1,26 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class="loading"><img src="{{ url_for('static', filename='img/loading.gif') }}"></div>
+<div class="icon-loading"><img src="{{ url_for('static', filename='img/loading.gif') }}"></div>
 
-<div class="necco-content" id="contentPassbook">
-  <div class="overlay"></div>
+<div class="content-loading" id="contentPassbook">
+  <div class="content-overlay"></div>
   {% include "passbook.html" %}
   {% include "pagenation.html" %}
 </div>
 
-<div class="necco-content" id="contentSettings">
-  <div class="overlay"></div>
+<div class="content-loading" id="contentSettings">
+  <div class="content-overlay"></div>
   {% include "settings.html" %}
 </div>
 
-<div class="necco-content" id="contentAbilities">
-  <div class="overlay"></div>
+<div class="content-loading" id="contentAbilities">
+  <div class="content-overlay"></div>
   {% include "pagenation.html" %}
 </div>
 
-<div class="necco-content" id="contentRequests">
-  <div class="overlay"></div>
+<div class="content-loading" id="contentRequests">
+  <div class="content-overlay"></div>
   {% include "pagenation.html" %}
 </div>
 

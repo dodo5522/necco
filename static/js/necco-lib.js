@@ -6,15 +6,15 @@ var activateNavbarItem = function(elementId) {
 };
 
 var hideContent = function() {
-  $(".necco-content").css("display", "none");
-  $(".overlay").css("display", "");
-  $(".loading").css("display", "");
+  $(".content-loading").css("display", "none");
+  $(".content-overlay").css("display", "");
+  $(".icon-loading").css("display", "");
 };
 
 var showContent = function(idContent) {
-  $(".necco-content").css("display", "none");
-  $(".overlay").fadeOut();
-  $(".loading").fadeOut();
+  $(".content-loading").css("display", "none");
+  $(".content-overlay").fadeOut();
+  $(".icon-loading").fadeOut();
   $(idContent).fadeIn();
 };
 

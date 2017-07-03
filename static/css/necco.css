@@ -3,7 +3,7 @@
 @import url(https://fonts.googleapis.com/earlyaccess/nikukyu.css);
 @import url(https://fonts.googleapis.com/earlyaccess/hannari.css);
 
-img {
+img{
   max-width: 100%;
   height: auto;
 }
@@ -14,14 +14,14 @@ body {
 }
 */
 
-.loading {
+.icon-loading{
   position:fixed;
   left:50%;
   top:40%;
   margin-left:-30px;
 }
 
-.overlay {
+.content-overlay{
   width: 100%;
   height: 100%;
   position: fixed;
@@ -30,15 +30,11 @@ body {
   background-color: #efefef;
 }
 
-.necco-content {
+.content-loading{
   display: none;
 }
 
-.settings-must {
+.input-mandatory{
   color: red;
   font-size: smaller;
-}
-
-.align-right {
-  float: right;
 }
