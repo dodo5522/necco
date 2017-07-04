@@ -31,7 +31,7 @@ title = 地域通貨ねっこ通帳
 docroot = /var/lib/necco/templates
 secret_key = abcdefghijklmnopqrstuvwxyz1234567890
 
-[MYSQL]
+[SQL]
 db = necco
 port = 3306
 server = localhost
@@ -70,11 +70,11 @@ class TestMain(unittest.TestCase):
         self.assertEqual("Title", getattr(config, "TITLE"))
         self.assertEqual("/var/tmp/necco", getattr(config, "DOCROOT"))
         self.assertEqual("necco_temporary_key", getattr(config, "SECRET_KEY"))
-        self.assertEqual("necco", getattr(config, "MYSQL_DB"))
-        self.assertEqual(3306, getattr(config, "MYSQL_PORT"))
-        self.assertEqual("localhost", getattr(config, "MYSQL_SERVER"))
-        self.assertEqual("guest", getattr(config, "MYSQL_USER"))
-        self.assertEqual("guest's password", getattr(config, "MYSQL_PASSWORD"))
+        self.assertEqual("necco", getattr(config, "SQL_DB"))
+        self.assertEqual(3306, getattr(config, "SQL_PORT"))
+        self.assertEqual("localhost", getattr(config, "SQL_SERVER"))
+        self.assertEqual("guest", getattr(config, "SQL_USER"))
+        self.assertEqual("guest's password", getattr(config, "SQL_PASSWORD"))
 
     def test_with_valid_configuration_file(self):
         config_file = "{}_{}.ini".format(
@@ -89,11 +89,11 @@ class TestMain(unittest.TestCase):
         self.assertEqual("地域通貨ねっこ通帳", getattr(config, "TITLE"))
         self.assertEqual("/var/lib/necco/templates", getattr(config, "DOCROOT"))
         self.assertEqual("abcdefghijklmnopqrstuvwxyz1234567890", getattr(config, "SECRET_KEY"))
-        self.assertEqual("necco", getattr(config, "MYSQL_DB"))
-        self.assertEqual(3306, getattr(config, "MYSQL_PORT"))
-        self.assertEqual("localhost", getattr(config, "MYSQL_SERVER"))
-        self.assertEqual("necco_manager", getattr(config, "MYSQL_USER"))
-        self.assertEqual("necco_manager_password", getattr(config, "MYSQL_PASSWORD"))
+        self.assertEqual("necco", getattr(config, "SQL_DB"))
+        self.assertEqual(3306, getattr(config, "SQL_PORT"))
+        self.assertEqual("localhost", getattr(config, "SQL_SERVER"))
+        self.assertEqual("necco_manager", getattr(config, "SQL_USER"))
+        self.assertEqual("necco_manager_password", getattr(config, "SQL_PASSWORD"))
 
     def test_with_invalid_configuration_file(self):
         config_file = "{}_{}.ini".format(
