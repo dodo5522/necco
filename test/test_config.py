@@ -18,6 +18,7 @@
 import configparser
 from glob import glob
 import inspect
+from io import StringIO
 import unittest
 from necco.config import ServerConfiguration
 import os
@@ -104,6 +105,18 @@ class TestMain(unittest.TestCase):
             f.write("docroot = /var/lib/necco/templates")
 
         self.assertRaises(configparser.MissingSectionHeaderError, ServerConfiguration, config_file)
+
+    def test_with_configuration_file_obj(self):
+        config = ServerConfiguration(StringIO(_CONFIG_FILE_VALID_CONTENT))
+
+        self.assertEqual("地域通貨ねっこ通帳", getattr(config, "TITLE"))
+        self.assertEqual("/var/lib/necco/templates", getattr(config, "DOCROOT"))
+        self.assertEqual("abcdefghijklmnopqrstuvwxyz1234567890", getattr(config, "SECRET_KEY"))
+        self.assertEqual("necco", getattr(config, "SQL_DB"))
+        self.assertEqual(3306, getattr(config, "SQL_PORT"))
+        self.assertEqual("localhost", getattr(config, "SQL_SERVER"))
+        self.assertEqual("necco_manager", getattr(config, "SQL_USER"))
+        self.assertEqual("necco_manager_password", getattr(config, "SQL_PASSWORD"))
 
 
 if __name__ == "__main__":
