@@ -1,0 +1,21 @@
+#!/bin/bash
+
+GUNICORN=/usr/bin/gunicorn3
+
+PROCESS=10
+BIND_ADDRESS=0.0.0.0
+BIND_PORT=5001
+
+LOG_ACCESS=/var/log/necco/access.log
+LOG_ERROR=/var/log/necco/error.log
+
+PID=/var/run/necco.pid
+CONF=/etc/necco/necco.ini
+
+${GUNICORN} \
+    --bind ${BIND_ADDRESS}:${BIND_PORT} \
+    --workers ${PROCESS} \
+    --access-logfile ${LOG_ACCESS} \
+    --error-logfile ${LOG_ERROR} \
+    --pid ${PID} \
+    --worker-class gevent --daemon "necco.__main__:create_application('${CONF}')"
