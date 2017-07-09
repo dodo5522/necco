@@ -18,6 +18,7 @@
 from mymock import AbstractAccessorToTestData
 from flask import Flask
 from necco.api import RequestApi
+from necco.config import ServerConfiguration
 from necco.models import SqliteDb, RequestModel
 import json
 import unittest
@@ -41,11 +42,11 @@ class TestRequestApi(unittest.TestCase, AbstractAccessorToTestData):
         self.initialize_db()
 
         self._db = SqliteDb(self.get_db_path())
-        RequestApi.set_model(RequestModel(db=self._db))
-
         self._app = Flask("test")
 
-        requests_view = RequestApi.as_view("requests")
+        config = ServerConfiguration("")  # use default
+        requests_view = RequestApi.as_view("requests", config=config, model=RequestModel(config, db=self._db))
+
         self._app.add_url_rule(rule="/api/requests", view_func=requests_view, methods=["GET", ], defaults={"user_id": None})
         self._app.add_url_rule(rule="/api/requests/<int:user_id>", view_func=requests_view, methods=["GET", "PUT", "POST", "DELETE"])
 

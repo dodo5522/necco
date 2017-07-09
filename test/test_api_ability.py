@@ -19,6 +19,7 @@ from mymock import AbstractAccessorToTestData
 import unittest
 from flask import Flask
 from necco.api import AbilityApi
+from necco.config import ServerConfiguration
 from necco.models import SqliteDb, AbilityModel
 import json
 
@@ -41,11 +42,11 @@ class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
         self.initialize_db()
 
         self._db = SqliteDb(self.get_db_path())
-        AbilityApi.set_model(AbilityModel(db=self._db))
-
         self._app = Flask("test")
 
-        abilities_view = AbilityApi.as_view("abilities")
+        config = ServerConfiguration("")  # use default
+
+        abilities_view = AbilityApi.as_view("abilities", config=config, model=AbilityModel(config, db=self._db))
         self._app.add_url_rule(rule="/api/abilities", view_func=abilities_view, methods=["GET", ], defaults={"user_id": None})
         self._app.add_url_rule(rule="/api/abilities/<int:user_id>", view_func=abilities_view, methods=["GET", "PUT", "POST", "DELETE"])
 
@@ -156,16 +157,7 @@ class TestAbilityApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertIn("columns", data)
             self.assertIn("body", data)
 
-            self.assertEqual(3, data.get("length"))
-            self.assertEqual(1, len(data.get("columns")))
-            self.assertIn("genre", data.get("columns"))
-            self.assertIn("detail", data.get("columns"))
-            self.assertEqual("", data.get("body")[0].get("genre"))
-            self.assertEqual("植物の水やり", data.get("body")[0].get("detail"))
-            self.assertEqual("", data.get("body")[1].get("genre"))
-            self.assertEqual("子守り", data.get("body")[1].get("detail"))
-            self.assertEqual("", data.get("body")[2].get("genre"))
-            self.assertEqual("犬の散歩", data.get("body")[2].get("detail"))
+            self.assertEqual(0, data.get("length"))
 
     def test_put_to_update_a_users_ability(self):
         test_user_id = 1

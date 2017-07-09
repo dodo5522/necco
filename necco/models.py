@@ -22,7 +22,18 @@ from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash
 
 
-class SqliteDb(object):
+class INeccoDb(object):
+    """ Interface to necco database.
+    """
+    pass
+
+
+class SqliteDb(INeccoDb):
+    """ To create instance of Sqlite DB. This class to use mainly for testing.
+
+    arguments:
+        path_to_db: Path to your Sqlite DB file.
+    """
     def __init__(self, path_to_db, **kwargs):
         self.__db_meta = MetaData(
             bind=create_engine("sqlite:///" + path_to_db))
@@ -32,10 +43,19 @@ class SqliteDb(object):
             setattr(self, name, table)
 
 
-class MySqlDb(object):
+class MySqlDb(INeccoDb):
+    """ To create an instance of MySQL DB as singleton.
+
+    arguments:
+        user: User name to login MySQL DB.
+        pasword: Password for the above user.
+        server: IP address or something of MySQL server.
+        port: Port number.
+        db_name: DB name.
+    """
     __instance = None
 
-    def __new__(cls, user, password, server, port, db_name, url=None):
+    def __new__(cls, user, password, server, port, db_name):
         if cls.__instance is None:
             cls.__instance = object.__new__(cls)
 
@@ -46,7 +66,7 @@ class MySqlDb(object):
                     SERVER=server,
                     PORT=port,
                     DB=db_name),
-                pool_recycle=14400) if url is None else create_engine(url)
+                pool_recycle=14400)
 
             cls.__db_meta = MetaData(bind=engine)
             cls.__db_meta.reflect()
@@ -57,7 +77,16 @@ class MySqlDb(object):
         return cls.__instance
 
 
-class BaseModel(object):
+class AbstractModel(object):
+    """ Abstract base model to provide APIs to access database for necco.
+
+    arguments:
+        config: Configuration object of necco.config.Configuration.
+
+    keyword arguments:
+        db: Dabase instance with INeccoDb. This's mainly used for testing.
+    """
+
     def __init__(self, config, db=None, **kwargs):
         self._db = db if db else MySqlDb(
             config.SQL_USER,
@@ -73,7 +102,16 @@ class BaseModel(object):
         raise NotImplementedError
 
 
-class AccountModel(BaseModel):
+class AccountModel(AbstractModel):
+    """ Model to provide APIs to access user's account on necco DB.
+
+    arguments:
+        config: Configuration object of necco.config.Configuration.
+
+    keyword arguments:
+        db: Dabase instance with INeccoDb. This's mainly used for testing.
+    """
+
     def __init__(self, config, **kwargs):
         super().__init__(config, db=kwargs.get("db"))
         self.account_columns = OrderedDict()
@@ -175,7 +213,16 @@ class AccountModel(BaseModel):
         # self.update_prefecture_with(id_, kwargs)
 
 
-class AbilityModel(BaseModel):
+class AbilityModel(AbstractModel):
+    """ Model to provide APIs to access user's ability on necco DB.
+
+    arguments:
+        config: Configuration object of necco.config.Configuration.
+
+    keyword arguments:
+        db: Dabase instance with INeccoDb. This's mainly used for testing.
+    """
+
     def __init__(self, config, **kwargs):
         super().__init__(config, db=kwargs.get("db"))
         self.ability_columns = {
@@ -225,7 +272,16 @@ class AbilityModel(BaseModel):
             yield {columns[i]: r for i, r in enumerate(record)}
 
 
-class RequestModel(BaseModel):
+class RequestModel(AbstractModel):
+    """ Model to provide APIs to access user's requests on necco DB.
+
+    arguments:
+        config: Configuration object of necco.config.Configuration.
+
+    keyword arguments:
+        db: Dabase instance with INeccoDb. This's mainly used for testing.
+    """
+
     def __init__(self, config, **kwargs):
         super().__init__(config, db=kwargs.get("db"))
         self.request_columns = {
@@ -287,7 +343,7 @@ class RequestModel(BaseModel):
             yield {columns[i]: r for i, r in enumerate(record)}
 
 
-class PrefectureModel(BaseModel):
+class PrefectureModel(AbstractModel):
     def __init__(self, config, **kwargs):
         super().__init__(config, db=kwargs.get("db"))
 

@@ -18,11 +18,10 @@
 from mymock import AbstractAccessorToTestData
 from flask import Flask
 from necco.api import AccountApi
+from necco.config import ServerConfiguration
 from necco.models import SqliteDb, AccountModel
 import json
-import os
 import unittest
-from unittest.mock import patch
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
@@ -44,11 +43,11 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
         self.initialize_db()
 
         self._db = SqliteDb(self.get_db_path())
-        AccountApi.set_model(AccountModel(db=self._db))
-
         self._app = Flask("test")
 
-        account_view = AccountApi.as_view("account")
+        config = ServerConfiguration("")  # use default
+        account_view = AccountApi.as_view("account", config=config, model=AccountModel(config, db=self._db))
+
         self._app.add_url_rule(rule="/api/account", view_func=account_view, methods=["POST", ])
         self._app.add_url_rule(rule="/api/account", view_func=account_view, methods=["GET", "PUT", "DELETE"], defaults={"user_id": None})
         self._app.add_url_rule(rule="/api/account/<int:user_id>", view_func=account_view, methods=["GET", "PUT", "DELETE"])
