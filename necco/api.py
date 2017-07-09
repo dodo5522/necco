@@ -21,26 +21,18 @@ from flask.views import MethodView
 from necco.models import AccountModel, AbilityModel, RequestModel, PrefectureModel
 
 
-class ModelSwitcher(object):
-    _model = None
-
-    @classmethod
-    def set_model(cls, model):
-        cls._model = model
-
-    @classmethod
-    def is_model_set(cls):
-        return cls._model is not None
-
-
-class AbilityApi(MethodView, ModelSwitcher):
+class AbilityApi(MethodView):
     """ for route of /api/abilities """
 
     def __init__(self, *args, **kwargs):
         config = kwargs.pop("config")
-        super().__init__(*args, **kwargs)
-        if not self.is_model_set():
-            self.set_model(AbilityModel(config))
+
+        if "model" in kwargs:
+            self._model = kwargs.pop("model")
+        else:
+            self._model = AbilityModel(config)
+
+        super(AbilityApi, self).__init__(*args, **kwargs)
 
     def get(self, user_id):
         user_ids = []
@@ -75,14 +67,18 @@ class AbilityApi(MethodView, ModelSwitcher):
         return "<html><body>Not implemented yet.</body></html>"
 
 
-class RequestApi(MethodView, ModelSwitcher):
+class RequestApi(MethodView):
     """ for route of /api/requests """
 
     def __init__(self, *args, **kwargs):
         config = kwargs.pop("config")
+
+        if "model" in kwargs:
+            self._model = kwargs.pop("model")
+        else:
+            self._model = RequestModel(config)
+
         super(RequestApi, self).__init__(*args, **kwargs)
-        if not self.is_model_set():
-            self.set_model(RequestModel(config))
 
     def get(self, user_id):
         user_ids = []
@@ -111,14 +107,18 @@ class RequestApi(MethodView, ModelSwitcher):
         return "<html><body>Not implemented yet.</body></html>"
 
 
-class PrefectureApi(MethodView, ModelSwitcher):
+class PrefectureApi(MethodView):
     """ for route of /api/prefs """
 
     def __init__(self, *args, **kwargs):
         config = kwargs.pop("config")
+
+        if "model" in kwargs:
+            self._model = kwargs.pop("model")
+        else:
+            self._model = PrefectureModel(config)
+
         super(PrefectureApi, self).__init__(*args, **kwargs)
-        if not self.is_model_set():
-            self.set_model(PrefectureModel(config))
 
     def get(self):
         columns = ["id", "name"]
@@ -132,14 +132,18 @@ class PrefectureApi(MethodView, ModelSwitcher):
         return json.dumps(sending_obj)
 
 
-class AccountApi(MethodView, ModelSwitcher):
+class AccountApi(MethodView):
     """ for route of "/api/account" """
 
     def __init__(self, *args, **kwargs):
         config = kwargs.pop("config")
+
+        if "model" in kwargs:
+            self._model = kwargs.pop("model")
+        else:
+            self._model = AccountModel(config)
+
         super().__init__(*args, **kwargs)
-        if not self.is_model_set():
-            self.set_model(AccountModel(config))
 
     def post(self):
         """ Create new user account. """

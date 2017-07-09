@@ -38,10 +38,8 @@ class ServerConfiguration(object):
     def __init__(self, file_path):
         """ Set configuration based on the specified file.
 
-        returns:
-            Default configuration data dict.
-        raises:
-            PermissionError: If configuration file cannot be written on the specified path.
+        arguments:
+            file_path: path to file or file like object.
         """
         def get_default_parser():
             parser = configparser.ConfigParser()
@@ -54,19 +52,15 @@ class ServerConfiguration(object):
 
             return parser
 
-        if os.path.exists(file_path):
-            parser = configparser.ConfigParser()
-            parser.read(file_path, encoding="UTF-8")
+        if isinstance(file_path, str):
+            if os.path.exists(file_path):
+                parser = configparser.ConfigParser()
+                parser.read(file_path, encoding="UTF-8")
+            else:
+                parser = get_default_parser()
         else:
-            parser = get_default_parser()
-            try:
-                with open(file_path, "w") as f:
-                    parser.write(f)
-            except PermissionError as e:
-                pass
-            except Exception as e:
-                # TODO: logging or something
-                raise
+            parser = configparser.ConfigParser()
+            parser.read_file(file_path)
 
         self.TITLE = parser["GENERAL"]["TITLE"]
         self.DOCROOT = parser["GENERAL"]["DOCROOT"]
