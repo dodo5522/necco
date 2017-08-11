@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS User (
     createdAt   DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updatedAt   DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     email       VARCHAR(321) DEFAULT '' NOT NULL,
-    password_   VARCHAR(128) NOT NULL
+    password_   VARCHAR(128) NOT NULL,
+    isAdmin     BOOLEAN NOT NULL
 );"""
 
 _QUERY_CREATE_TABLE_HISTORY = """
@@ -139,8 +140,8 @@ _QUERIES_INSERT = [
     _QUERY_INSERT.format(TABLE="Request", COLUMNS="id_, genre, detail", VALUES="1, '', '子守り'"),
     _QUERY_INSERT.format(TABLE="Request", COLUMNS="id_, genre, detail", VALUES="2, '', '家に車が無い為、何かの機会に同乗させて頂けると嬉しい'"),
     _QUERY_INSERT.format(TABLE="Request", COLUMNS="id_, genre, detail", VALUES="3, '', '妊娠出産で大変な時の、元気いっぱいの上の子2人のお世話'"),
-    _QUERY_INSERT.format(TABLE="User", COLUMNS="id_, email, password_", VALUES="1, 'taro.yamada@temp.com', '{}'".format(generate_password_hash("taro's password"))),
-    _QUERY_INSERT.format(TABLE="User", COLUMNS="id_, email, password_", VALUES="2, 'jiro.yamada@temp.com', '{}'".format(generate_password_hash("jiro's password"))),
+    _QUERY_INSERT.format(TABLE="User", COLUMNS="id_, email, password_, isAdmin", VALUES="1, 'taro.yamada@temp.com', '{}', 0".format(generate_password_hash("taro's password"))),
+    _QUERY_INSERT.format(TABLE="User", COLUMNS="id_, email, password_, isAdmin", VALUES="2, 'jiro.yamada@temp.com', '{}', 1".format(generate_password_hash("jiro's password"))),
     _QUERY_INSERT.format(TABLE="UsersAbility", COLUMNS="id_, userId, abilityId", VALUES="0, 1, 1"),
     _QUERY_INSERT.format(TABLE="UsersAbility", COLUMNS="id_, userId, abilityId", VALUES="1, 1, 2"),
     _QUERY_INSERT.format(TABLE="UsersAbility", COLUMNS="id_, userId, abilityId", VALUES="2, 1, 3"),
