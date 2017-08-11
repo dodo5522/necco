@@ -148,11 +148,12 @@ class AccountApi(MethodView):
     def post(self):
         """ Create new user account. """
 
-        got = {key: value for key, value in request.form.items()}
+        # TODO: session貼ったユーザがAdmin権限を持たない場合、エラーとする
 
-        # create account data via AccountModel
+        got_data = {key: value for key, value in request.form.items()}
+        user_id = self._model.create_account_with(**got_data)
 
-        return json.dumps(got)
+        return json.dumps(user_id)
 
     def get(self, user_id):
         """ Get user account information who logs in currently. """

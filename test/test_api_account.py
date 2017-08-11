@@ -110,14 +110,6 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertEqual(None, got_data.get("lastName"))
             self.assertEqual(None, got_data.get("firstName"))
 
-    @unittest.skip("not implemented yet")
-    def test_post(self):
-        with self._app.test_client() as c:
-            with c.session_transaction() as sess:
-                sess["user_id"] = 2
-
-            ret = c.post("/api/account", data={"name": "Saburo", "age": 12})
-
     def test_put(self):
         with self._app.test_client() as c:
             user_id = 2
@@ -204,12 +196,118 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertEqual(0.5, result[0][columns.index(self._db.Profile.c.longitude)])
             self.assertEqual("趣味は機械学習モデル実装です", result[0][columns.index(self._db.Profile.c.profile)])
 
-    @unittest.skip("not implemented yet")
-    def test_put_with_id_1(self):
+    @unittest.skip
+    def test_post_with_valid_params_by_normal_user(self):
         pass
 
-    @unittest.skip("not implemented yet")
-    def test_put_with_id_2(self):
+    def test_post_with_valid_params_by_admin(self):
+        with self._app.test_client() as c:
+
+            # prepare
+            user_id = 2  # admin user
+            with c.session_transaction() as sess:
+                sess["user_id"] = user_id
+
+            email = "saburo@temp.com"
+            password_ = "saburo's password"
+            isAdmin = 1
+            lastName = "山田"
+            firstName = "三郎"
+            lastKanaName = "やまだ"
+            firstKanaName = "さぶろう"
+            nickName = "さぶろー"
+            phoneNumber = "01-234-5678"
+            faxNumber = "02-345-6789"
+            prefectureId = 11
+            address = "上尾市"
+            streetAddress = "プリムヴェールシャンテ"
+            latitude = 0.25
+            longitude = 0.5
+            profile = "趣味は機械学習モデル実装です"
+
+            # tested method
+            ret = c.post(
+                "/api/account",
+                data={
+                    "email": email,
+                    "password_": password_,
+                    "isAdmin": isAdmin,
+                    "lastName": lastName,
+                    "firstName": firstName,
+                    "lastKanaName": lastKanaName,
+                    "firstKanaName": firstKanaName,
+                    "nickName": nickName,
+                    "phoneNumber": phoneNumber,
+                    "faxNumber": faxNumber,
+                    "prefectureId": prefectureId,
+                    "address": address,
+                    "streetAddress": streetAddress,
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "profile": profile,
+                    # TODO: このへんもjs含めて実装
+                    # "abilities": [
+                    #     {
+                    #         "id_": "",
+                    #         "genre": "",
+                    #         "detail": "",
+                    #     },
+                    # "requests": [
+                    #     {
+                    #         "id_": "",
+                    #         "genre": "",
+                    #         "detail": "",
+                    #     },
+                }
+            )
+
+            # verify
+            self.assertEqual(200, ret.status_code)
+
+            columns = [
+                self._db.User.c.id_,
+                self._db.User.c.email,
+                self._db.User.c.password_,
+                self._db.User.c.isAdmin,
+                self._db.Profile.c.lastName,
+                self._db.Profile.c.firstName,
+                self._db.Profile.c.lastKanaName,
+                self._db.Profile.c.firstKanaName,
+                self._db.Profile.c.nickName,
+                self._db.Profile.c.phoneNumber,
+                self._db.Profile.c.faxNumber,
+                self._db.Profile.c.prefectureId,
+                self._db.Profile.c.address,
+                self._db.Profile.c.streetAddress,
+                self._db.Profile.c.latitude,
+                self._db.Profile.c.longitude,
+                self._db.Profile.c.profile,
+            ]
+
+            joined = self._db.Profile.join(self._db.User, self._db.Profile.c.userId == self._db.User.c.id_)
+            selected = joined.select(self._db.User.c.email == email)
+            result = selected.with_only_columns(columns).execute().fetchall()
+
+            self.assertEqual(1, len(result))
+            self.assertEqual(email, result[0][columns.index(self._db.User.c.email)])
+            self.assertTrue(check_password_hash(result[0][columns.index(self._db.User.c.password_)], password_))
+            self.assertEqual(user_id + 1, result[0][columns.index(self._db.Profile.c.userId)])  # auto increment
+            self.assertEqual(lastName, result[0][columns.index(self._db.Profile.c.lastName)])
+            self.assertEqual(firstName, result[0][columns.index(self._db.Profile.c.firstName)])
+            self.assertEqual(lastKanaName, result[0][columns.index(self._db.Profile.c.lastKanaName)])
+            self.assertEqual(firstKanaName, result[0][columns.index(self._db.Profile.c.firstKanaName)])
+            self.assertEqual(nickName, result[0][columns.index(self._db.Profile.c.nickName)])
+            self.assertEqual(phoneNumber, result[0][columns.index(self._db.Profile.c.phoneNumber)])
+            self.assertEqual(faxNumber, result[0][columns.index(self._db.Profile.c.faxNumber)])
+            self.assertEqual(prefectureId, result[0][columns.index(self._db.Profile.c.prefectureId)])
+            self.assertEqual(address, result[0][columns.index(self._db.Profile.c.address)])
+            self.assertEqual(streetAddress, result[0][columns.index(self._db.Profile.c.streetAddress)])
+            self.assertEqual(latitude, result[0][columns.index(self._db.Profile.c.latitude)])
+            self.assertEqual(longitude, result[0][columns.index(self._db.Profile.c.longitude)])
+            self.assertEqual(profile, result[0][columns.index(self._db.Profile.c.profile)])
+
+    @unittest.skip
+    def test_post_with_invalid_params_by_admin(self):
         pass
 
     @unittest.skip("not implemented yet")

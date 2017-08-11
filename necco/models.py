@@ -212,6 +212,16 @@ class AccountModel(AbstractModel):
         # TODO:
         # self.update_prefecture_with(id_, kwargs)
 
+    def create_account_with(self, **kwargs):
+        """ Create new account information. user id is provided automatically.
+        """
+
+        # TODO: insert文を構築して実行
+        query = self._db.User.insert().values()
+
+        # TODO: 生成したuser idを返す
+        return 0
+
 
 class AbilityModel(AbstractModel):
     """ Model to provide APIs to access user's ability on necco DB.
