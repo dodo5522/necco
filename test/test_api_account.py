@@ -22,7 +22,7 @@ from necco.config import ServerConfiguration
 from necco.models import SqliteDb, AccountModel
 import json
 import unittest
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 
 
 class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
@@ -130,7 +130,7 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
                     "nickName": "ほげら",
                     "phoneNumber": "01-234-5678",
                     "faxNumber": "02-345-6789",
-                    "prefectureId": "11", # 埼玉県
+                    "prefectureId": "11",  # 埼玉県
                     "address": "上尾市",
                     "streetAddress": "プリムヴェールシャンテ",
                     "latitude": "0.25",
@@ -321,6 +321,7 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
     @unittest.skip("not implemented yet")
     def test_delete_with_id_2(self):
         pass
+
 
 if __name__ == "__main__":
     unittest.main()
