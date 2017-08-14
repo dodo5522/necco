@@ -22,7 +22,7 @@ from necco.config import ServerConfiguration
 from necco.models import SqliteDb, AccountModel
 import json
 import unittest
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
@@ -209,7 +209,7 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
                 sess["user_id"] = user_id
 
             email = "saburo@temp.com"
-            password_ = "saburo's password"
+            password_ = generate_password_hash("saburo's password")
             isAdmin = 1
             lastName = "山田"
             firstName = "三郎"

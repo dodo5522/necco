@@ -19,6 +19,7 @@ import json
 from flask import session, request
 from flask.views import MethodView
 from necco.models import AccountModel, AbilityModel, RequestModel, PrefectureModel
+from necco.error import NoAdminPermission
 
 
 class AbilityApi(MethodView):
@@ -148,7 +149,9 @@ class AccountApi(MethodView):
     def post(self):
         """ Create new user account. """
 
-        # TODO: session貼ったユーザがAdmin権限を持たない場合、エラーとする
+        # current session's user can create new account if admin.
+        if not self._model.is_admin():
+            raise NoAdminPermission
 
         got_data = {key: value for key, value in request.form.items()}
         user_id = self._model.create_account_with(**got_data)

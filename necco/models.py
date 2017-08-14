@@ -148,9 +148,9 @@ class AccountModel(AbstractModel):
 
         query = self._db.User.select(self._db.User.c.email == email)
         query = query.with_only_columns([self._db.User.c.id_, ])
-
         record = query.execute().fetchone()
-        return record[0]
+
+        return record[0] if record else 0
 
     def get_email(self, id_):
         """ Getter function returns the specified user's email.
@@ -213,14 +213,45 @@ class AccountModel(AbstractModel):
         # self.update_prefecture_with(id_, kwargs)
 
     def create_account_with(self, **kwargs):
-        """ Create new account information. user id is provided automatically.
+        """ Create new account information. user id is generated automatically.
+
+        Args:
+            email, password_, ...: Parameters needed for user to be created.
+
+        Returns:
+            user id if success, else 0.
         """
+        def create_user(params):
+            query = self._db.User.insert()
+            query = query.values(email=params["email"])
+            query = query.values(password_=params["password_"])
+            query = query.values(isAdmin=params["isAdmin"])
+            query.execute()
 
-        # TODO: insert文を構築して実行
-        query = self._db.User.insert().values()
+            return self.get_id(email)
 
-        # TODO: 生成したuser idを返す
-        return 0
+        def create_profile(user_id, params):
+            query = self._db.Profile.insert()
+            query = query.values(userId=user_id)
+            query = query.values(**params)
+            query.execute()
+
+        email = kwargs.get("email")
+
+        # error if user already exists
+        if self.get_id(email):
+            return 0
+
+        params = {}
+        for column in self._db.Profile.c.keys():
+            val = kwargs.get(column)
+            if val:
+                params[column] = val
+
+        user_id = create_user(kwargs)
+        create_profile(user_id, params)
+
+        return self.get_id(email)
 
 
 class AbilityModel(AbstractModel):
