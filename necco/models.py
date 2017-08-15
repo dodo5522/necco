@@ -181,6 +181,16 @@ class AccountModel(AbstractModel):
 
         return {str(key): str(value) for key, value in zip(self.account_columns.keys(), record)}
 
+    def is_admin(self, user_id):
+        """ Get isAdmin flag's value. """
+
+        query = self._db.User.select(self._db.User.c.id_ == user_id)
+        query = query.with_only_columns([self._db.User.c.isAdmin, ])
+
+        record = query.execute().fetchone()
+
+        return bool(record[0]) if record is not None else False
+
     def update_user_with(self, id_, **kwargs):
         query = self._db.User.update().where(self._db.User.c.id_ == id_)
 
@@ -222,9 +232,11 @@ class AccountModel(AbstractModel):
             user id if success, else 0.
         """
         def create_user(params):
+            hashed_password = generate_password_hash(params["password_"])
+
             query = self._db.User.insert()
             query = query.values(email=params["email"])
-            query = query.values(password_=params["password_"])
+            query = query.values(password_=hashed_password)
             query = query.values(isAdmin=params["isAdmin"])
             query.execute()
 

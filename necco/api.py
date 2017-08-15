@@ -16,10 +16,9 @@
 #   limitations under the License.
 
 import json
-from flask import session, request
+from flask import session, request, abort
 from flask.views import MethodView
 from necco.models import AccountModel, AbilityModel, RequestModel, PrefectureModel
-from necco.error import NoAdminPermission
 
 
 class AbilityApi(MethodView):
@@ -150,8 +149,8 @@ class AccountApi(MethodView):
         """ Create new user account. """
 
         # current session's user can create new account if admin.
-        if not self._model.is_admin():
-            raise NoAdminPermission
+        if not self._model.is_admin(session["user_id"]):
+            abort(403)
 
         got_data = {key: value for key, value in request.form.items()}
         user_id = self._model.create_account_with(**got_data)

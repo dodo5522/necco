@@ -22,7 +22,7 @@ from necco.config import ServerConfiguration
 from necco.models import SqliteDb, AccountModel
 import json
 import unittest
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 
 
 class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
@@ -196,9 +196,22 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertEqual(0.5, result[0][columns.index(self._db.Profile.c.longitude)])
             self.assertEqual("趣味は機械学習モデル実装です", result[0][columns.index(self._db.Profile.c.profile)])
 
-    @unittest.skip
     def test_post_with_valid_params_by_normal_user(self):
-        pass
+        with self._app.test_client() as c:
+
+            # prepare
+            user_id = 1  # normal user
+            with c.session_transaction() as sess:
+                sess["user_id"] = user_id
+
+            # tested method
+            ret = c.post(
+                "/api/account",
+                data={}
+            )
+
+            # verify
+            self.assertEqual(403, ret.status_code)
 
     def test_post_with_valid_params_by_admin(self):
         with self._app.test_client() as c:
@@ -209,7 +222,7 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
                 sess["user_id"] = user_id
 
             email = "saburo@temp.com"
-            password_ = generate_password_hash("saburo's password")
+            password_ = "saburo's password"
             isAdmin = 1
             lastName = "山田"
             firstName = "三郎"
@@ -269,6 +282,7 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
                 self._db.User.c.email,
                 self._db.User.c.password_,
                 self._db.User.c.isAdmin,
+                self._db.Profile.c.userId,
                 self._db.Profile.c.lastName,
                 self._db.Profile.c.firstName,
                 self._db.Profile.c.lastKanaName,
@@ -289,22 +303,24 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             result = selected.with_only_columns(columns).execute().fetchall()
 
             self.assertEqual(1, len(result))
-            self.assertEqual(email, result[0][columns.index(self._db.User.c.email)])
-            self.assertTrue(check_password_hash(result[0][columns.index(self._db.User.c.password_)], password_))
-            self.assertEqual(user_id + 1, result[0][columns.index(self._db.Profile.c.userId)])  # auto increment
-            self.assertEqual(lastName, result[0][columns.index(self._db.Profile.c.lastName)])
-            self.assertEqual(firstName, result[0][columns.index(self._db.Profile.c.firstName)])
-            self.assertEqual(lastKanaName, result[0][columns.index(self._db.Profile.c.lastKanaName)])
-            self.assertEqual(firstKanaName, result[0][columns.index(self._db.Profile.c.firstKanaName)])
-            self.assertEqual(nickName, result[0][columns.index(self._db.Profile.c.nickName)])
-            self.assertEqual(phoneNumber, result[0][columns.index(self._db.Profile.c.phoneNumber)])
-            self.assertEqual(faxNumber, result[0][columns.index(self._db.Profile.c.faxNumber)])
-            self.assertEqual(prefectureId, result[0][columns.index(self._db.Profile.c.prefectureId)])
-            self.assertEqual(address, result[0][columns.index(self._db.Profile.c.address)])
-            self.assertEqual(streetAddress, result[0][columns.index(self._db.Profile.c.streetAddress)])
-            self.assertEqual(latitude, result[0][columns.index(self._db.Profile.c.latitude)])
-            self.assertEqual(longitude, result[0][columns.index(self._db.Profile.c.longitude)])
-            self.assertEqual(profile, result[0][columns.index(self._db.Profile.c.profile)])
+            result = result[0]
+
+            self.assertEqual(email, result[columns.index(self._db.User.c.email)])
+            self.assertTrue(check_password_hash(result[columns.index(self._db.User.c.password_)], password_))
+            self.assertEqual(user_id + 1, result[columns.index(self._db.Profile.c.userId)])  # auto increment
+            self.assertEqual(lastName, result[columns.index(self._db.Profile.c.lastName)])
+            self.assertEqual(firstName, result[columns.index(self._db.Profile.c.firstName)])
+            self.assertEqual(lastKanaName, result[columns.index(self._db.Profile.c.lastKanaName)])
+            self.assertEqual(firstKanaName, result[columns.index(self._db.Profile.c.firstKanaName)])
+            self.assertEqual(nickName, result[columns.index(self._db.Profile.c.nickName)])
+            self.assertEqual(phoneNumber, result[columns.index(self._db.Profile.c.phoneNumber)])
+            self.assertEqual(faxNumber, result[columns.index(self._db.Profile.c.faxNumber)])
+            self.assertEqual(prefectureId, result[columns.index(self._db.Profile.c.prefectureId)])
+            self.assertEqual(address, result[columns.index(self._db.Profile.c.address)])
+            self.assertEqual(streetAddress, result[columns.index(self._db.Profile.c.streetAddress)])
+            self.assertEqual(latitude, result[columns.index(self._db.Profile.c.latitude)])
+            self.assertEqual(longitude, result[columns.index(self._db.Profile.c.longitude)])
+            self.assertEqual(profile, result[columns.index(self._db.Profile.c.profile)])
 
     @unittest.skip
     def test_post_with_invalid_params_by_admin(self):
