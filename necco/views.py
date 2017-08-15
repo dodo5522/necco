@@ -18,7 +18,7 @@
 import json
 from necco.auth import PasswordAuthentication
 from flask import render_template, session, request, redirect
-from flask.views import View, MethodView
+from flask.views import MethodView
 
 
 class LoginView(MethodView):
@@ -51,14 +51,14 @@ class LogoutView(MethodView):
         return redirect("/login")
 
 
-class MainView(View):
-    methods = ["GET", ]
+class MainView(MethodView):
+    """ for main view """
 
     def __init__(self, *args, **kwargs):
         self._config = kwargs.pop("config")
-        super(View, self).__init__(*args, **kwargs)
+        super(MethodView, self).__init__(*args, **kwargs)
 
-    def dispatch_request(self):
+    def get(self):
         if not session["user_id"]:
             return redirect("/login")
 

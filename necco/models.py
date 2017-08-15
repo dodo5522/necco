@@ -152,17 +152,17 @@ class AccountModel(AbstractModel):
 
         return record[0] if record else 0
 
-    def get_email(self, id_):
+    def get_email(self, user_id):
         """ Getter function returns the specified user's email.
         """
 
-        query = self._db.User.select(self._db.User.c.id_ == id_)
+        query = self._db.User.select(self._db.User.c.id_ == user_id)
         query = query.with_only_columns([self._db.User.c.email, ])
 
         record = query.execute().fetchone()
         return record[0]
 
-    def get_all(self, id_):
+    def get_all(self, user_id):
         """ Getter function returns the specified user infomation.
 
             SELECT Profile.name_, Profile.kana, Profile.nickname, ... from Profile
@@ -170,14 +170,14 @@ class AccountModel(AbstractModel):
                    inner join Prefecture on Profile.prefectureId = Prefecture.id_;
         """
 
-        joined_query = self._db.User.join(
+        query = self._db.User.join(
             self._db.Profile, self._db.User.c.id_ == self._db.Profile.c.userId)
-        joined_query = joined_query.join(
+        query = query.join(
             self._db.Prefecture, self._db.Profile.c.prefectureId == self._db.Prefecture.c.id_)
-        joined_query = joined_query.select(
-            self._db.User.c.id_ == id_).with_only_columns(self.account_columns.values())
+        query = query.select(
+            self._db.User.c.id_ == user_id).with_only_columns(self.account_columns.values())
 
-        record = joined_query.execute().fetchone()
+        record = query.execute().fetchone()
 
         return {str(key): str(value) for key, value in zip(self.account_columns.keys(), record)}
 
@@ -191,33 +191,34 @@ class AccountModel(AbstractModel):
 
         return bool(record[0]) if record is not None else False
 
-    def update_user_with(self, id_, **kwargs):
-        query = self._db.User.update().where(self._db.User.c.id_ == id_)
+    def update_user_with(self, id_, password_, email):
+        hashed_password = generate_password_hash(password_)
 
-        if kwargs.get("email"):
-            query = query.values(email=kwargs.get("email"))
+        query = self._db.User.update()
+        query = query.where(self._db.User.c.id_ == id_)
+        query = query.values(email=email)
+        query = query.values(password_=hashed_password)
+        query = query.values(updatedAt=datetime.now())
 
-        if kwargs.get("password_"):
-            hashed_password = generate_password_hash(kwargs.get("password_"))
-            query = query.values(password_=hashed_password)
-
-        query.values(updatedAt=datetime.now()).execute()
+        query.execute()
 
     def update_profile_with(self, id_, **kwargs):
-        query = self._db.Profile.update().where(self._db.Profile.c.userId == id_)
-
         params = {"updatedAt": datetime.now()}
         for column in self._db.Profile.c.keys():
             val = kwargs.get(column)
             if val:
                 params[column] = val
 
-        query.values(**params).execute()
+        query = self._db.Profile.update()
+        query = query.where(self._db.Profile.c.userId == id_)
+        query = query.values(**params)
+
+        query.execute()
 
     def update_account_with(self, id_, **kwargs):
         """ Update account information against the specified user id.
         """
-        self.update_user_with(id_, **kwargs)
+        self.update_user_with(id_, kwargs["password_"], kwargs["email"])
         self.update_profile_with(id_, **kwargs)
         # TODO:
         # self.update_prefecture_with(id_, kwargs)

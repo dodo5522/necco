@@ -110,7 +110,7 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertEqual(None, got_data.get("lastName"))
             self.assertEqual(None, got_data.get("firstName"))
 
-    def test_put(self):
+    def test_put_to_update_a_users_account(self):
         with self._app.test_client() as c:
             user_id = 2
 
@@ -221,57 +221,42 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             with c.session_transaction() as sess:
                 sess["user_id"] = user_id
 
-            email = "saburo@temp.com"
-            password_ = "saburo's password"
-            isAdmin = 1
-            lastName = "山田"
-            firstName = "三郎"
-            lastKanaName = "やまだ"
-            firstKanaName = "さぶろう"
-            nickName = "さぶろー"
-            phoneNumber = "01-234-5678"
-            faxNumber = "02-345-6789"
-            prefectureId = 11
-            address = "上尾市"
-            streetAddress = "プリムヴェールシャンテ"
-            latitude = 0.25
-            longitude = 0.5
-            profile = "趣味は機械学習モデル実装です"
+            posting_data = {
+                "email": "saburo@temp.com",
+                "password_": "saburo's password",
+                "isAdmin": 1,
+                "lastName": "山田",
+                "firstName": "三郎",
+                "lastKanaName": "やまだ",
+                "firstKanaName": "さぶろう",
+                "nickName": "さぶろー",
+                "phoneNumber": "01-234-5678",
+                "faxNumber": "02-345-6789",
+                "prefectureId": 11,
+                "address": "上尾市",
+                "streetAddress": "プリムヴェールシャンテ",
+                "latitude": 0.25,
+                "longitude": 0.5,
+                "profile": "趣味は機械学習モデル実装です",
+                # TODO: このへんもjs含めて実装
+                # "abilities": [
+                #     {
+                #         "id_": "",
+                #         "genre": "",
+                #         "detail": "",
+                #     },
+                # "requests": [
+                #     {
+                #         "id_": "",
+                #         "genre": "",
+                #         "detail": "",
+                #     },
+            }
 
             # tested method
             ret = c.post(
                 "/api/account",
-                data={
-                    "email": email,
-                    "password_": password_,
-                    "isAdmin": isAdmin,
-                    "lastName": lastName,
-                    "firstName": firstName,
-                    "lastKanaName": lastKanaName,
-                    "firstKanaName": firstKanaName,
-                    "nickName": nickName,
-                    "phoneNumber": phoneNumber,
-                    "faxNumber": faxNumber,
-                    "prefectureId": prefectureId,
-                    "address": address,
-                    "streetAddress": streetAddress,
-                    "latitude": latitude,
-                    "longitude": longitude,
-                    "profile": profile,
-                    # TODO: このへんもjs含めて実装
-                    # "abilities": [
-                    #     {
-                    #         "id_": "",
-                    #         "genre": "",
-                    #         "detail": "",
-                    #     },
-                    # "requests": [
-                    #     {
-                    #         "id_": "",
-                    #         "genre": "",
-                    #         "detail": "",
-                    #     },
-                }
+                data=posting_data
             )
 
             # verify
@@ -299,30 +284,29 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             ]
 
             joined = self._db.Profile.join(self._db.User, self._db.Profile.c.userId == self._db.User.c.id_)
-            selected = joined.select(self._db.User.c.email == email)
+            selected = joined.select(self._db.User.c.email == posting_data["email"])
             result = selected.with_only_columns(columns).execute().fetchall()
 
             self.assertEqual(1, len(result))
             result = result[0]
 
-            self.assertEqual(email, result[columns.index(self._db.User.c.email)])
-            self.assertTrue(check_password_hash(result[columns.index(self._db.User.c.password_)], password_))
+            self.assertEqual(posting_data["email"], result[columns.index(self._db.User.c.email)])
+            self.assertTrue(check_password_hash(result[columns.index(self._db.User.c.password_)], posting_data["password_"]))
             self.assertEqual(user_id + 1, result[columns.index(self._db.Profile.c.userId)])  # auto increment
-            self.assertEqual(lastName, result[columns.index(self._db.Profile.c.lastName)])
-            self.assertEqual(firstName, result[columns.index(self._db.Profile.c.firstName)])
-            self.assertEqual(lastKanaName, result[columns.index(self._db.Profile.c.lastKanaName)])
-            self.assertEqual(firstKanaName, result[columns.index(self._db.Profile.c.firstKanaName)])
-            self.assertEqual(nickName, result[columns.index(self._db.Profile.c.nickName)])
-            self.assertEqual(phoneNumber, result[columns.index(self._db.Profile.c.phoneNumber)])
-            self.assertEqual(faxNumber, result[columns.index(self._db.Profile.c.faxNumber)])
-            self.assertEqual(prefectureId, result[columns.index(self._db.Profile.c.prefectureId)])
-            self.assertEqual(address, result[columns.index(self._db.Profile.c.address)])
-            self.assertEqual(streetAddress, result[columns.index(self._db.Profile.c.streetAddress)])
-            self.assertEqual(latitude, result[columns.index(self._db.Profile.c.latitude)])
-            self.assertEqual(longitude, result[columns.index(self._db.Profile.c.longitude)])
-            self.assertEqual(profile, result[columns.index(self._db.Profile.c.profile)])
+            self.assertEqual(posting_data["lastName"], result[columns.index(self._db.Profile.c.lastName)])
+            self.assertEqual(posting_data["firstName"], result[columns.index(self._db.Profile.c.firstName)])
+            self.assertEqual(posting_data["lastKanaName"], result[columns.index(self._db.Profile.c.lastKanaName)])
+            self.assertEqual(posting_data["firstKanaName"], result[columns.index(self._db.Profile.c.firstKanaName)])
+            self.assertEqual(posting_data["nickName"], result[columns.index(self._db.Profile.c.nickName)])
+            self.assertEqual(posting_data["phoneNumber"], result[columns.index(self._db.Profile.c.phoneNumber)])
+            self.assertEqual(posting_data["faxNumber"], result[columns.index(self._db.Profile.c.faxNumber)])
+            self.assertEqual(posting_data["prefectureId"], result[columns.index(self._db.Profile.c.prefectureId)])
+            self.assertEqual(posting_data["address"], result[columns.index(self._db.Profile.c.address)])
+            self.assertEqual(posting_data["streetAddress"], result[columns.index(self._db.Profile.c.streetAddress)])
+            self.assertEqual(posting_data["latitude"], result[columns.index(self._db.Profile.c.latitude)])
+            self.assertEqual(posting_data["longitude"], result[columns.index(self._db.Profile.c.longitude)])
+            self.assertEqual(posting_data["profile"], result[columns.index(self._db.Profile.c.profile)])
 
-    @unittest.skip
     def test_post_with_invalid_params_by_admin(self):
         pass
 
