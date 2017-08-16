@@ -153,7 +153,13 @@ class AccountApi(MethodView):
             abort(403)
 
         got_data = {key: value for key, value in request.form.items()}
-        user_id = self._model.create_account_with(**got_data)
+
+        try:
+            user_id = self._model.create_account_with(**got_data)
+        except:
+            # TODO: need to rollback database if error
+            # sqlalchemy.exc.IntegrityError: Insufficient query parameter.
+            abort(400)
 
         return json.dumps(user_id)
 

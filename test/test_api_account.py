@@ -308,7 +308,53 @@ class TestAccountApi(unittest.TestCase, AbstractAccessorToTestData):
             self.assertEqual(posting_data["profile"], result[columns.index(self._db.Profile.c.profile)])
 
     def test_post_with_invalid_params_by_admin(self):
-        pass
+        with self._app.test_client() as c:
+
+            # prepare
+            user_id = 2  # admin user
+            with c.session_transaction() as sess:
+                sess["user_id"] = user_id
+
+            # data with lack of mandatroy parameter
+            posting_data = {
+                "email": "saburo@temp.com",
+                "password_": "saburo's password",
+                "isAdmin": 1,
+                # "lastName": "山田",
+                # "firstName": "三郎",
+                # "lastKanaName": "やまだ",
+                # "firstKanaName": "さぶろう",
+                "nickName": "さぶろー",
+                "phoneNumber": "01-234-5678",
+                "faxNumber": "02-345-6789",
+                "prefectureId": 11,
+                "address": "上尾市",
+                "streetAddress": "プリムヴェールシャンテ",
+                "latitude": 0.25,
+                "longitude": 0.5,
+                "profile": "趣味は機械学習モデル実装です",
+            }
+
+            # tested method
+            ret = c.post(
+                "/api/account",
+                data=posting_data
+            )
+
+            # verify
+            self.assertEqual(400, ret.status_code)
+
+            query = self._db.User.select(self._db.User.c.id_ == 3)
+            query = query.with_only_columns([self._db.User.c.id_, ])
+            result = query.execute().fetchall()
+
+            self.assertEqual(0, len(result))
+
+            query = self._db.Profile.select(self._db.Profile.c.userId == 3)
+            query = query.with_only_columns([self._db.User.c.id_, ])
+            result = query.execute().fetchall()
+
+            self.assertEqual(0, len(result))
 
     @unittest.skip("not implemented yet")
     def test_delete(self):

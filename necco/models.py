@@ -231,6 +231,9 @@ class AccountModel(AbstractModel):
 
         Returns:
             user id if success, else 0.
+
+        Exceptions:
+            sqlalchemy.exc.IntegrityError: Insufficient query parameter.
         """
         def create_user(params):
             hashed_password = generate_password_hash(params["password_"])
@@ -264,7 +267,7 @@ class AccountModel(AbstractModel):
         user_id = create_user(kwargs)
         create_profile(user_id, params)
 
-        return self.get_id(email)
+        return user_id
 
 
 class AbilityModel(AbstractModel):
